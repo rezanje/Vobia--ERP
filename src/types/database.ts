@@ -94,6 +94,12 @@ export type Database = {
         Update: { id?: string; tenant_id?: string; po_id?: string; sku_id?: string; qty_ordered?: number; qty_received?: number; reject_count?: number; created_at?: string }
         Relationships: []
       }
+      cost_entries: {
+        Row: { id: string; tenant_id: string; po_id: string; cost_type: string; amount: number; note: string | null; created_at: string }
+        Insert: { id?: string; tenant_id?: string; po_id: string; cost_type: string; amount: number; note?: string | null; created_at?: string }
+        Update: { id?: string; tenant_id?: string; po_id?: string; cost_type?: string; amount?: number; note?: string | null; created_at?: string }
+        Relationships: []
+      }
     }
     Views: {
       style_summary: {
@@ -102,6 +108,10 @@ export type Database = {
       }
       stock_balances: {
         Row: { sku_id: string | null; tenant_id: string | null; balance: number | null }
+        Relationships: []
+      }
+      sku_hpp: {
+        Row: { tenant_id: string | null; sku_id: string | null; hpp: number | null; costed_units: number | null }
         Relationships: []
       }
     }
