@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "gen:types": "supabase gen types typescript --db-url \"$SUPABASE_DB_URL\" --schema public > src/types/database.ts",
+    "test:db": "node scripts/pgtap.mjs",
     "e2e": "playwright test"
   },
   "dependencies": {
