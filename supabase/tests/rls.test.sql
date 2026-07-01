@@ -1,32 +1,40 @@
-set search_path to extensions, public, auth;
+-- Tenant isolation proof.
+-- Seeds two users (the signup trigger auto-creates a tenant + owner profile for
+-- each), then assumes Tenant A's identity via a JWT claim and asserts that RLS
+-- hides every other tenant's profile. Raises an exception on any leak, so the
+-- test runner surfaces a failure. Rolled back at the end.
+set search_path to public, auth;
 begin;
-select plan(3);
 
-select has_table('public','tenants','tenants table exists');
-select has_table('public','profiles','profiles table exists');
+insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data) values
+  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa','00000000-0000-0000-0000-000000000000','authenticated','authenticated','a@a.test','{"tenant_name":"Tenant A"}'),
+  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb','00000000-0000-0000-0000-000000000000','authenticated','authenticated','b@b.test','{"tenant_name":"Tenant B"}');
 
--- seed two tenants + two profiles bypassing RLS (as postgres).
--- auth.users rows first to satisfy the profiles FK. (No signup trigger yet at
--- this migration, so profiles are inserted manually.)
-insert into auth.users (id, instance_id, aud, role, email) values
-  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa','00000000-0000-0000-0000-000000000000','authenticated','authenticated','a@a.test'),
-  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb','00000000-0000-0000-0000-000000000000','authenticated','authenticated','b@b.test');
-insert into public.tenants (id, name) values
-  ('11111111-1111-1111-1111-111111111111','Tenant A'),
-  ('22222222-2222-2222-2222-222222222222','Tenant B');
-insert into public.profiles (id, tenant_id, role) values
-  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa','11111111-1111-1111-1111-111111111111','owner'),
-  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb','22222222-2222-2222-2222-222222222222','owner');
-
--- act as an authenticated user of Tenant A
+-- become an authenticated user of Tenant A; the claim carries A's real
+-- (trigger-created) tenant_id, read here while still the privileged role.
+select set_config('request.jwt.claims',
+  json_build_object(
+    'sub','aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+    'role','owner',
+    'tenant_id',(select tenant_id::text from public.profiles where id='aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')
+  )::text, true);
 set local role authenticated;
-set local request.jwt.claims to '{"sub":"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa","tenant_id":"11111111-1111-1111-1111-111111111111","role":"owner"}';
 
-select is(
-  (select count(*)::int from public.profiles where tenant_id = '22222222-2222-2222-2222-222222222222'),
-  0,
-  'Tenant A cannot read Tenant B profiles'
-);
+do $$
+declare
+  own_cnt int;
+  leak_cnt int;
+  my_tenant uuid := (current_setting('request.jwt.claims')::json->>'tenant_id')::uuid;
+begin
+  select count(*) into own_cnt  from public.profiles;
+  select count(*) into leak_cnt from public.profiles where tenant_id <> my_tenant;
+  if own_cnt <> 1 then
+    raise exception 'RLS FAIL: expected exactly 1 visible (own) profile, got %', own_cnt;
+  end if;
+  if leak_cnt <> 0 then
+    raise exception 'RLS FAIL: % cross-tenant profiles visible to Tenant A', leak_cnt;
+  end if;
+  raise notice 'RLS OK: own=% leak=%', own_cnt, leak_cnt;
+end $$;
 
-select * from finish();
 rollback;

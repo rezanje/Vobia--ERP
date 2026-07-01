@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "gen:types": "supabase gen types typescript --db-url \"$SUPABASE_DB_URL\" --schema public > src/types/database.ts"
   },
   "dependencies": {
     "next": "16.2.9",
@@ -20,6 +21,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.9",
+    "pg": "^8.22.0",
     "supabase": "^2.109.0",
     "tailwindcss": "^4",
     "typescript": "^5"
