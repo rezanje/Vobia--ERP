@@ -22,9 +22,9 @@ select is(
 select is(
   public.custom_access_token_hook(
     '{"user_id":"dddddddd-dddd-dddd-dddd-dddddddddddd","claims":{}}'::jsonb
-  ) -> 'claims' ->> 'role',
+  ) -> 'claims' ->> 'user_role',
   'ops',
-  'hook injects role claim');
+  'hook injects user_role claim (not the reserved role claim)');
 
 select * from finish();
 rollback;
