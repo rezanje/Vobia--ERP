@@ -24,3 +24,23 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+:root {
+  --vb-bg: #0f1b15;
+  --vb-surface: #16211b;
+  --vb-border: #2b3a31;
+  --vb-text: #e8f0e8;
+  --vb-muted: #8fa89a;
+  --vb-accent: #d7ff61;
+}
+.vb-app { min-height: 100vh; background: var(--vb-bg); color: var(--vb-text); display: flex; }
+.vb-side { width: 200px; border-right: 1px solid var(--vb-border); padding: 20px 12px; display: flex; flex-direction: column; gap: 4px; }
+.vb-side a { color: var(--vb-muted); text-decoration: none; padding: 8px 10px; border-radius: 8px; font-size: 14px; }
+.vb-side a:hover { background: var(--vb-surface); color: var(--vb-text); }
+.vb-main { flex: 1; padding: 28px 32px; }
+.vb-card { background: var(--vb-surface); border: 1px solid var(--vb-border); border-radius: 12px; }
+.vb-input { background: var(--vb-surface); border: 1px solid var(--vb-border); border-radius: 6px; padding: 8px 10px; color: var(--vb-text); width: 100%; }
+.vb-btn { background: var(--vb-accent); color: #16211b; border: none; border-radius: 6px; padding: 8px 16px; font-weight: 500; cursor: pointer; }
+.vb-btn-ghost { background: transparent; color: var(--vb-muted); border: 1px solid var(--vb-border); border-radius: 6px; padding: 8px 16px; cursor: pointer; }
+.vb-chip { border: 1px solid var(--vb-border); color: var(--vb-muted); border-radius: 5px; padding: 4px 10px; cursor: pointer; user-select: none; }
+.vb-chip.on { background: var(--vb-accent); color: #16211b; border-color: var(--vb-accent); font-weight: 500; }
