@@ -13,6 +13,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <div style={{ color: 'var(--vb-accent)', fontWeight: 500, padding: '4px 10px 12px' }}>Vobia ERP</div>
         <Link href="/">Dashboard</Link>
         <Link href="/styles">Styles</Link>
+        <Link href="/stock">Stock</Link>
       </nav>
       <main className="vb-main">{children}</main>
     </div>
