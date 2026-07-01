@@ -23,7 +23,7 @@ test('login renders the tenant-scoped dashboard', async ({ page }) => {
     user_metadata: { tenant_name: 'E2E Co', full_name: 'E2E User' },
   })
   expect(error).toBeNull()
-  const userId = created!.user.id
+  const userId = created!.user!.id
 
   try {
     await page.goto('/login')

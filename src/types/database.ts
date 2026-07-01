@@ -52,9 +52,40 @@ export type Database = {
           },
         ]
       }
+      styles: {
+        Row: { id: string; tenant_id: string; code: string; name: string; collection: string | null; created_at: string }
+        Insert: { id?: string; tenant_id: string; code: string; name: string; collection?: string | null; created_at?: string }
+        Update: { id?: string; tenant_id?: string; code?: string; name?: string; collection?: string | null; created_at?: string }
+        Relationships: []
+      }
+      colorways: {
+        Row: { id: string; tenant_id: string; style_id: string; color_name: string; color_code: string; created_at: string }
+        Insert: { id?: string; tenant_id: string; style_id: string; color_name: string; color_code: string; created_at?: string }
+        Update: { id?: string; tenant_id?: string; style_id?: string; color_name?: string; color_code?: string; created_at?: string }
+        Relationships: []
+      }
+      skus: {
+        Row: { id: string; tenant_id: string; colorway_id: string; size: string; sku_code: string; active: boolean; created_at: string }
+        Insert: { id?: string; tenant_id: string; colorway_id: string; size: string; sku_code: string; active?: boolean; created_at?: string }
+        Update: { id?: string; tenant_id?: string; colorway_id?: string; size?: string; sku_code?: string; active?: boolean; created_at?: string }
+        Relationships: []
+      }
     }
-    Views: { [_ in never]: never }
-    Functions: { [_ in never]: never }
+    Views: {
+      style_summary: {
+        Row: { id: string; tenant_id: string; code: string; name: string; collection: string | null; created_at: string; colorway_count: number; sku_count: number }
+        Relationships: []
+      }
+    }
+    Functions: {
+      create_style_with_skus: {
+        Args: {
+          p_code: string; p_name: string; p_collection: string
+          p_colorways: Json; p_sizes: string[]; p_overrides: Json
+        }
+        Returns: string
+      }
+    }
     Enums: { [_ in never]: never }
     CompositeTypes: { [_ in never]: never }
   }
