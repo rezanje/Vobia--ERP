@@ -99,7 +99,7 @@ begin
 
   if p.tenant_id is not null then
     claims := jsonb_set(claims, '{tenant_id}', to_jsonb(p.tenant_id::text));
-    claims := jsonb_set(claims, '{role}', to_jsonb(p.role));
+    claims := jsonb_set(claims, '{user_role}', to_jsonb(p.role));
   end if;
 
   return jsonb_set(event, '{claims}', claims);
@@ -108,6 +108,8 @@ $$;
 ```
 
 Daftarkan hook di Supabase Auth config (dashboard / config.toml). Grant execute ke `supabase_auth_admin`, revoke dari publik.
+
+> **Penting (gotcha):** app role masuk claim `user_role`, **bukan** `role`. Claim `role` dipakai PostgREST untuk `SET ROLE` (harus `authenticated`/`anon`); kalau ditimpa `owner` → `role "owner" does not exist` (401) di semua request data. Phase 2 yang butuh baca app-role dari JWT baca `user_role`.
 
 ## 6. Auth flow
 
