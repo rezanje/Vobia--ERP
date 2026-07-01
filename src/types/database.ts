@@ -76,6 +76,24 @@ export type Database = {
         Update: { id?: string; tenant_id?: string; sku_id?: string; qty?: number; movement_type?: string; reason?: string | null; ref_type?: string | null; ref_id?: string | null; created_by?: string | null; created_at?: string }
         Relationships: []
       }
+      vendors: {
+        Row: { id: string; tenant_id: string; name: string; contact: string | null; active: boolean; created_at: string }
+        Insert: { id?: string; tenant_id?: string; name: string; contact?: string | null; active?: boolean; created_at?: string }
+        Update: { id?: string; tenant_id?: string; name?: string; contact?: string | null; active?: boolean; created_at?: string }
+        Relationships: []
+      }
+      production_orders: {
+        Row: { id: string; tenant_id: string; code: string; style_id: string; vendor_id: string; stage: string; deadline: string | null; notes: string | null; created_at: string }
+        Insert: { id?: string; tenant_id: string; code: string; style_id: string; vendor_id: string; stage?: string; deadline?: string | null; notes?: string | null; created_at?: string }
+        Update: { id?: string; tenant_id?: string; code?: string; style_id?: string; vendor_id?: string; stage?: string; deadline?: string | null; notes?: string | null; created_at?: string }
+        Relationships: []
+      }
+      prod_lines: {
+        Row: { id: string; tenant_id: string; po_id: string; sku_id: string; qty_ordered: number; qty_received: number; reject_count: number; created_at: string }
+        Insert: { id?: string; tenant_id: string; po_id: string; sku_id: string; qty_ordered: number; qty_received?: number; reject_count?: number; created_at?: string }
+        Update: { id?: string; tenant_id?: string; po_id?: string; sku_id?: string; qty_ordered?: number; qty_received?: number; reject_count?: number; created_at?: string }
+        Relationships: []
+      }
     }
     Views: {
       style_summary: {
@@ -98,6 +116,14 @@ export type Database = {
       record_movement: {
         Args: { p_sku_id: string; p_qty: number; p_movement_type: string; p_reason?: string; p_ref_type?: string; p_ref_id?: string }
         Returns: string
+      }
+      create_production_order: {
+        Args: { p_style_id: string; p_vendor_id: string; p_deadline?: string | null; p_notes: string; p_lines: Json }
+        Returns: string
+      }
+      transition_production_stage: {
+        Args: { p_po_id: string; p_next_stage: string }
+        Returns: undefined
       }
     }
     Enums: { [_ in never]: never }
