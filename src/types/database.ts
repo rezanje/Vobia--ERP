@@ -70,10 +70,20 @@ export type Database = {
         Update: { id?: string; tenant_id?: string; colorway_id?: string; size?: string; sku_code?: string; active?: boolean; created_at?: string }
         Relationships: []
       }
+      stock_ledger: {
+        Row: { id: string; tenant_id: string; sku_id: string; qty: number; movement_type: string; reason: string | null; ref_type: string | null; ref_id: string | null; created_by: string | null; created_at: string }
+        Insert: { id?: string; tenant_id: string; sku_id: string; qty: number; movement_type: string; reason?: string | null; ref_type?: string | null; ref_id?: string | null; created_by?: string | null; created_at?: string }
+        Update: { id?: string; tenant_id?: string; sku_id?: string; qty?: number; movement_type?: string; reason?: string | null; ref_type?: string | null; ref_id?: string | null; created_by?: string | null; created_at?: string }
+        Relationships: []
+      }
     }
     Views: {
       style_summary: {
         Row: { id: string; tenant_id: string; code: string; name: string; collection: string | null; created_at: string; colorway_count: number; sku_count: number }
+        Relationships: []
+      }
+      stock_balances: {
+        Row: { sku_id: string | null; tenant_id: string | null; balance: number | null }
         Relationships: []
       }
     }
@@ -83,6 +93,10 @@ export type Database = {
           p_code: string; p_name: string; p_collection: string
           p_colorways: Json; p_sizes: string[]; p_overrides: Json
         }
+        Returns: string
+      }
+      record_movement: {
+        Args: { p_sku_id: string; p_qty: number; p_movement_type: string; p_reason?: string; p_ref_type?: string; p_ref_id?: string }
         Returns: string
       }
     }
