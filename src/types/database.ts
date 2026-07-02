@@ -100,6 +100,24 @@ export type Database = {
         Update: { id?: string; tenant_id?: string; po_id?: string; cost_type?: string; amount?: number; note?: string | null; created_at?: string }
         Relationships: []
       }
+      channels: {
+        Row: { id: string; tenant_id: string; name: string; active: boolean; created_at: string }
+        Insert: { id?: string; tenant_id?: string; name: string; active?: boolean; created_at?: string }
+        Update: { id?: string; tenant_id?: string; name?: string; active?: boolean; created_at?: string }
+        Relationships: []
+      }
+      orders: {
+        Row: { id: string; tenant_id: string; code: string; channel_id: string; order_date: string; customer: string | null; notes: string | null; created_at: string }
+        Insert: { id?: string; tenant_id: string; code: string; channel_id: string; order_date?: string; customer?: string | null; notes?: string | null; created_at?: string }
+        Update: { id?: string; tenant_id?: string; code?: string; channel_id?: string; order_date?: string; customer?: string | null; notes?: string | null; created_at?: string }
+        Relationships: []
+      }
+      order_lines: {
+        Row: { id: string; tenant_id: string; order_id: string; sku_id: string; qty: number; unit_price: number; created_at: string }
+        Insert: { id?: string; tenant_id: string; order_id: string; sku_id: string; qty: number; unit_price?: number; created_at?: string }
+        Update: { id?: string; tenant_id?: string; order_id?: string; sku_id?: string; qty?: number; unit_price?: number; created_at?: string }
+        Relationships: []
+      }
     }
     Views: {
       style_summary: {
@@ -134,6 +152,10 @@ export type Database = {
       transition_production_stage: {
         Args: { p_po_id: string; p_next_stage: string }
         Returns: undefined
+      }
+      create_order: {
+        Args: { p_channel_id: string; p_order_date?: string | null; p_customer: string; p_notes: string; p_lines: Json }
+        Returns: string
       }
     }
     Enums: { [_ in never]: never }
