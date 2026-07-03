@@ -118,6 +118,18 @@ export type Database = {
         Update: { id?: string; tenant_id?: string; order_id?: string; sku_id?: string; qty?: number; unit_price?: number; created_at?: string }
         Relationships: []
       }
+      returns: {
+        Row: { id: string; tenant_id: string; code: string; order_id: string; return_date: string; reason: string | null; notes: string | null; created_at: string }
+        Insert: { id?: string; tenant_id?: string; code: string; order_id: string; return_date?: string; reason?: string | null; notes?: string | null; created_at?: string }
+        Update: { id?: string; tenant_id?: string; code?: string; order_id?: string; return_date?: string; reason?: string | null; notes?: string | null; created_at?: string }
+        Relationships: []
+      }
+      return_lines: {
+        Row: { id: string; tenant_id: string; return_id: string; sku_id: string; qty: number; created_at: string }
+        Insert: { id?: string; tenant_id: string; return_id: string; sku_id: string; qty: number; created_at?: string }
+        Update: { id?: string; tenant_id?: string; return_id?: string; sku_id?: string; qty?: number; created_at?: string }
+        Relationships: []
+      }
     }
     Views: {
       style_summary: {
@@ -155,6 +167,10 @@ export type Database = {
       }
       create_order: {
         Args: { p_channel_id: string; p_order_date?: string | null; p_customer: string; p_notes: string; p_lines: Json }
+        Returns: string
+      }
+      create_return: {
+        Args: { p_order_id: string; p_return_date?: string | null; p_reason: string; p_notes: string; p_lines: Json }
         Returns: string
       }
     }
