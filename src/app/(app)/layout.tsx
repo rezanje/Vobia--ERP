@@ -19,6 +19,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <Link href="/costing">Costing</Link>
         <Link href="/orders">Orders</Link>
         <Link href="/channels">Channels</Link>
+        <Link href="/returns">Returns</Link>
       </nav>
       <main className="vb-main">{children}</main>
     </div>
