@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { rp } from '@/lib/ui'
 
 export default async function CostingPage() {
   const supabase = await createClient()
@@ -8,26 +9,25 @@ export default async function CostingPage() {
 
   return (
     <div>
-      <h1 style={{ fontSize: 22, fontWeight: 500, marginBottom: 20 }}>Costing (HPP)</h1>
-      <div className="vb-card">
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
-          <thead>
-            <tr style={{ color: 'var(--vb-muted)', textAlign: 'left' }}>
-              <th style={{ padding: 12 }}>SKU</th><th style={{ padding: 12 }}>HPP</th><th style={{ padding: 12 }}>Costed units</th>
-            </tr>
-          </thead>
-          <tbody>
-            {!hpp?.length ? (
-              <tr><td style={{ padding: 12, color: 'var(--vb-muted)' }} colSpan={3}>No costed SKUs yet.</td></tr>
-            ) : hpp.map((h) => (
-              <tr key={h.sku_id} style={{ borderTop: '1px solid var(--vb-border)' }}>
-                <td style={{ padding: 12, color: 'var(--vb-accent)' }}>{codeOf.get(h.sku_id ?? '') ?? h.sku_id}</td>
-                <td style={{ padding: 12 }}>{h.hpp === null ? '—' : Number(h.hpp).toLocaleString()}</td>
-                <td style={{ padding: 12, color: 'var(--vb-muted)' }}>{h.costed_units}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div style={{ marginBottom: 20 }}>
+        <h1 className="vb-h1">HPP / Costing</h1>
+        <div className="vb-sub">{hpp?.length ?? 0} SKU sudah ter-costing</div>
+      </div>
+      <div className="vb-card" style={{ overflow: 'hidden', maxWidth: 720 }}>
+        <div className="vb-thead" style={{ gridTemplateColumns: '1.5fr 150px 120px' }}>
+          <div>Kode SKU</div><div style={{ textAlign: 'right' }}>HPP</div><div style={{ textAlign: 'right' }}>Unit Costed</div>
+        </div>
+        <div style={{ maxHeight: 600, overflowY: 'auto' }}>
+          {!hpp?.length ? (
+            <div className="vb-empty">Belum ada SKU yang ter-costing.</div>
+          ) : hpp.map((h) => (
+            <div key={h.sku_id} className="vb-row" style={{ gridTemplateColumns: '1.5fr 150px 120px' }}>
+              <div className="vb-mono" style={{ fontWeight: 500, fontSize: 12.5 }}>{codeOf.get(h.sku_id ?? '') ?? h.sku_id}</div>
+              <div className="vb-mono" style={{ textAlign: 'right', fontWeight: 500, color: h.hpp === null ? 'var(--vb-muted)' : 'var(--vb-text)' }}>{h.hpp === null ? '—' : rp(Number(h.hpp))}</div>
+              <div className="vb-mono vb-muted" style={{ textAlign: 'right' }}>{h.costed_units}</div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   )

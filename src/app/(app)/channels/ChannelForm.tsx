@@ -11,7 +11,7 @@ export default function ChannelForm() {
 
   async function onSave() {
     setError(null)
-    if (!name.trim()) { setError('Name is required'); return }
+    if (!name.trim()) { setError('Nama wajib diisi'); return }
     setSaving(true)
     const res = await createChannel({ name: name.trim() })
     setSaving(false)
@@ -20,12 +20,15 @@ export default function ChannelForm() {
   }
 
   return (
-    <div className="vb-card" style={{ padding: 16, maxWidth: 420, marginBottom: 24 }}>
-      <div style={{ fontWeight: 500, marginBottom: 12 }}>New channel</div>
-      {error && <div style={{ color: '#ff9b9b', marginBottom: 8 }}>{error}</div>}
-      <div style={{ display: 'flex', gap: 8 }}>
-        <input className="vb-input" placeholder="Name (Shopee, Offline…)" value={name} onChange={(e) => setName(e.target.value)} />
-        <button className="vb-btn" type="button" disabled={saving} onClick={onSave}>{saving ? 'Saving…' : 'Add'}</button>
+    <div className="vb-card" style={{ padding: 18 }}>
+      <div className="vb-cardtitle" style={{ marginBottom: 12 }}>Channel Baru</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div>
+          <label className="vb-label">Nama</label>
+          <input className="vb-input" placeholder="Zalora" value={name} onChange={(e) => setName(e.target.value)} />
+        </div>
+        {error && <div className="vb-danger">{error}</div>}
+        <button className="vb-btn" type="button" disabled={saving} onClick={onSave} style={{ alignSelf: 'flex-end' }}>{saving ? 'Menyimpan…' : 'Simpan Channel'}</button>
       </div>
     </div>
   )

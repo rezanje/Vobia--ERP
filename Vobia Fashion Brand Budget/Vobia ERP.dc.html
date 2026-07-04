@@ -1,0 +1,1391 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+html,body{margin:0;padding:0;background:#131210;color:#edeae3;font-family:'Instrument Sans',system-ui,sans-serif;font-size:13.5px}
+body{--ac:#e3c46e;--acink:#171512;--rp:8px}
+*{box-sizing:border-box}
+::selection{background:rgba(227,196,110,.3)}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-thumb{background:#2e2b25;border-radius:5px;border:2px solid #131210}
+::-webkit-scrollbar-track{background:transparent}
+input::placeholder,textarea::placeholder{color:#6e685e}
+select option{background:#1b1a17;color:#edeae3}
+@keyframes vbToast{from{opacity:0;transform:translate(-50%,8px)}to{opacity:1;transform:translate(-50%,0)}}
+</style>
+</helmet>
+<div style="display:flex;height:100vh;overflow:hidden">
+
+<aside style="width:216px;flex:none;background:#100f0d;border-right:1px solid #262420;display:flex;flex-direction:column;padding:22px 14px 16px">
+  <img src="assets/vobia-logo-white.png" alt="Vobia" style="width:112px;height:auto;margin:2px 8px 26px;display:block">
+  <nav style="display:flex;flex-direction:column;gap:18px;flex:1;overflow-y:auto">
+    <sc-for list="{{ navGroups }}" as="g" hint-placeholder-count="4">
+      <div style="display:flex;flex-direction:column;gap:2px">
+        <div style="font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#6e685e;font-weight:600;padding:0 12px;margin:0 0 4px">{{ g.title }}</div>
+        <sc-for list="{{ g.items }}" as="it" hint-placeholder-count="2">
+          <div onClick="{{ it.go }}" style="padding:8px 12px;border-radius:8px;font-size:13.5px;cursor:pointer;font-weight:{{ it.fw }};color:{{ it.color }};background:{{ it.bg }}" style-hover="opacity:.9">{{ it.label }}</div>
+        </sc-for>
+      </div>
+    </sc-for>
+  </nav>
+  <div style="border-top:1px solid #262420;padding:14px 12px 2px;display:flex;align-items:center;gap:10px">
+    <div style="width:8px;height:8px;border-radius:50%;background:var(--ac)"></div>
+    <div>
+      <div style="font-size:12.5px;font-weight:600">Vobia Studio</div>
+      <div style="font-size:11px;color:#8f887b">Ops · Jakarta</div>
+    </div>
+  </div>
+</aside>
+
+<main style="flex:1;overflow-y:auto">
+<div style="max-width:1180px;margin:0 auto;padding:28px 36px 80px">
+
+<sc-if value="{{ isDashboard }}" hint-placeholder-val="{{ true }}">
+<div data-screen-label="Dashboard">
+  <div style="margin:0 0 22px">
+    <h1 style="font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:600;margin:0;letter-spacing:-.01em">Dashboard</h1>
+    <div style="color:#8f887b;font-size:12.5px;margin-top:4px">{{ dashSub }}</div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:0 0 14px">
+    <sc-for list="{{ metrics }}" as="m" hint-placeholder-count="5">
+      <div onClick="{{ m.go }}" style="background:#1b1a17;border:1px solid #2a2721;border-radius:12px;padding:16px;cursor:pointer" style-hover="border-color:#3a362e">
+        <div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#8f887b;font-weight:600">{{ m.label }}</div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:26px;font-weight:600;margin:8px 0 2px">{{ m.value }}</div>
+        <div style="font-size:11.5px;color:#8f887b">{{ m.sub }}</div>
+      </div>
+    </sc-for>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1.5fr;gap:12px;align-items:start">
+    <div style="background:#1b1a17;border:1px solid #2a2721;border-radius:12px;overflow:hidden">
+      <div style="padding:14px 16px 10px;display:flex;align-items:center;gap:8px">
+        <div style="width:7px;height:7px;border-radius:50%;background:#ff9b9b"></div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600">Oversold Alert</div>
+      </div>
+      <sc-if value="{{ hasOversold }}" hint-placeholder-val="{{ true }}">
+        <div style="display:grid;grid-template-columns:1fr 90px;gap:12px;padding:8px 16px;border-bottom:1px solid #2a2721;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#8f887b;font-weight:600">
+          <div>Kode SKU</div><div style="text-align:right">Saldo</div>
+        </div>
+        <sc-for list="{{ oversold }}" as="o" hint-placeholder-count="2">
+          <div style="display:grid;grid-template-columns:1fr 90px;gap:12px;padding:var(--rp) 16px;border-top:1px solid rgba(255,255,255,.045);align-items:center">
+            <div style="font-family:'Space Grotesk',sans-serif;font-weight:500">{{ o.code }}</div>
+            <div style="color:#ff9b9b;font-family:'Space Grotesk',sans-serif;font-weight:600;text-align:right">{{ o.bal }}</div>
+          </div>
+        </sc-for>
+      </sc-if>
+      <sc-if value="{{ noOversold }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:28px 16px;text-align:center;color:#8f887b;font-size:12.5px">Tidak ada SKU oversold. Semua saldo aman.</div>
+      </sc-if>
+    </div>
+    <div style="background:#1b1a17;border:1px solid #2a2721;border-radius:12px;overflow:hidden">
+      <div style="padding:14px 16px 10px;display:flex;align-items:center;justify-content:space-between">
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600">Order Terbaru</div>
+        <div onClick="{{ goOrders }}" style="font-size:12px;color:var(--ac);cursor:pointer">Lihat semua →</div>
+      </div>
+      <div style="display:grid;grid-template-columns:120px 1fr 100px 120px;gap:12px;padding:8px 16px;border-bottom:1px solid #2a2721;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#8f887b;font-weight:600">
+        <div>Kode</div><div>Channel</div><div>Tanggal</div><div style="text-align:right">Total</div>
+      </div>
+      <sc-for list="{{ recentOrders }}" as="ro" hint-placeholder-count="5">
+        <div onClick="{{ ro.open }}" style="display:grid;grid-template-columns:120px 1fr 100px 120px;gap:12px;padding:var(--rp) 16px;border-top:1px solid rgba(255,255,255,.045);align-items:center;cursor:pointer" style-hover="background:rgba(255,255,255,.025)">
+          <div style="font-family:'Space Grotesk',sans-serif;font-weight:500;color:var(--ac)">{{ ro.code }}</div>
+          <div>{{ ro.channel }}</div>
+          <div style="color:#8f887b;font-size:12.5px">{{ ro.date }}</div>
+          <div style="font-family:'Space Grotesk',sans-serif;font-weight:500;text-align:right">{{ ro.total }}</div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isStylesList }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Styles">
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;margin:0 0 20px">
+    <div>
+      <h1 style="font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:600;margin:0;letter-spacing:-.01em">Styles</h1>
+      <div style="color:#8f887b;font-size:12.5px;margin-top:4px">{{ stylesSub }}</div>
+    </div>
+    <button onClick="{{ goStyleCreate }}" style="background:var(--ac);color:#171512;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit" style-hover="filter:brightness(1.08)">+ Style Baru</button>
+  </div>
+  <div style="background:#1b1a17;border:1px solid #2a2721;border-radius:12px;overflow:hidden">
+    <div style="display:grid;grid-template-columns:110px 1.7fr 1.3fr 90px 70px;gap:12px;padding:11px 16px;border-bottom:1px solid #2a2721;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#8f887b;font-weight:600">
+      <div>Kode</div><div>Nama</div><div>Koleksi</div><div style="text-align:right">Colorway</div><div style="text-align:right">SKU</div>
+    </div>
+    <sc-for list="{{ styleRows }}" as="st" hint-placeholder-count="5">
+      <div onClick="{{ st.open }}" style="display:grid;grid-template-columns:110px 1.7fr 1.3fr 90px 70px;gap:12px;padding:var(--rp) 16px;border-top:1px solid rgba(255,255,255,.045);align-items:center;cursor:pointer" style-hover="background:rgba(255,255,255,.025)">
+        <div style="font-family:'Space Grotesk',sans-serif;font-weight:500;color:var(--ac)">{{ st.code }}</div>
+        <div style="font-weight:500">{{ st.name }}</div>
+        <div style="color:#8f887b">{{ st.collection }}</div>
+        <div style="text-align:right;font-family:'Space Grotesk',sans-serif">{{ st.cw }}</div>
+        <div style="text-align:right;font-family:'Space Grotesk',sans-serif">{{ st.skuCount }}</div>
+      </div>
+    </sc-for>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isStyleCreate }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Style Baru" style="max-width:780px">
+  <div onClick="{{ cancelStyleCreate }}" style="color:#8f887b;font-size:12.5px;cursor:pointer;margin:0 0 10px" style-hover="color:#edeae3">← Styles</div>
+  <div style="margin:0 0 20px">
+    <h1 style="font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:600;margin:0;letter-spacing:-.01em">Style Baru</h1>
+    <div style="color:#8f887b;font-size:12.5px;margin-top:4px">Definisikan style, colorway, dan size — SKU di-generate otomatis</div>
+  </div>
+  <div style="background:#1b1a17;border:1px solid #2a2721;border-radius:12px;padding:18px;margin:0 0 12px">
+    <div style="display:grid;grid-template-columns:150px 1.6fr 1.3fr;gap:12px">
+      <div>
+        <label style="display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#8f887b;font-weight:600;margin:0 0 6px">Kode</label>
+        <input value="{{ sfCode }}" onChange="{{ onSfCode }}" placeholder="VB-KJ06" style="width:100%;background:#211f1a;border:1px solid #2e2b25;border-radius:8px;color:#edeae3;padding:9px 11px;font-size:13px;outline:none;font-family:inherit" style-focus="border-color:var(--ac)">
+      </div>
+      <div>
+        <label style="display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#8f887b;font-weight:600;margin:0 0 6px">Nama</label>
+        <input value="{{ sfName }}" onChange="{{ onSfName }}" placeholder="Nama style" style="width:100%;background:#211f1a;border:1px solid #2e2b25;border-radius:8px;color:#edeae3;padding:9px 11px;font-size:13px;outline:none;font-family:inherit" style-focus="border-color:var(--ac)">
+      </div>
+      <div>
+        <label style="display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#8f887b;font-weight:600;margin:0 0 6px">Koleksi</label>
+        <input value="{{ sfCollection }}" onChange="{{ onSfCollection }}" placeholder="Tarunggana Vol. 03" style="width:100%;background:#211f1a;border:1px solid #2e2b25;border-radius:8px;color:#edeae3;padding:9px 11px;font-size:13px;outline:none;font-family:inherit" style-focus="border-color:var(--ac)">
+      </div>
+    </div>
+  </div>
+  <div style="background:#1b1a17;border:1px solid #2a2721;border-radius:12px;padding:18px;margin:0 0 12px">
+    <div style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;margin:0 0 12px">Colorway</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <sc-for list="{{ cwRows }}" as="cw" hint-placeholder-count="1">
+        <div style="display:grid;grid-template-columns:1.6fr 130px 34px;gap:8px;align-items:center">
+          <input value="{{ cw.name }}" onChange="{{ cw.onName }}" placeholder="Batik Navy" style="width:100%;background:#211f1a;border:1px solid #2e2b25;border-radius:8px;color:#edeae3;padding:9px 11px;font-size:13px;outline:none;font-family:inherit" style-focus="border-color:var(--ac)">
+          <input value="{{ cw.code }}" onChange="{{ cw.onCode }}" placeholder="BNV" style="width:100%;background:#211f1a;border:1px solid #2e2b25;border-radius:8px;color:#edeae3;padding:9px 11px;font-size:13px;outline:none;font-family:inherit;font-family:'Space Grotesk',sans-serif" style-focus="border-color:var(--ac)">
+          <button onClick="{{ cw.onRemove }}" style="width:34px;height:34px;background:transparent;border:1px solid #2e2b25;color:#8f887b;border-radius:8px;cursor:pointer;font-size:15px;font-family:inherit" style-hover="border-color:#5a3434;color:#ff9b9b">×</button>
+        </div>
+      </sc-for>
+    </div>
+    <button onClick="{{ addCw }}" style="margin-top:10px;width:100%;background:transparent;border:1px dashed #3a362e;color:#8f887b;border-radius:8px;padding:9px;font-size:12.5px;cursor:pointer;font-family:inherit" style-hover="color:#edeae3;border-color:#4a453c">+ Tambah colorway</button>
+  </div>
+  <div style="background:#1b1a17;border:1px solid #2a2721;border-radius:12px;padding:18px;margin:0 0 12px">
+    <div style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;margin:0 0 12px">Size</div>
+    <div style="display:flex;gap:8px">
+      <sc-for list="{{ sizeChips }}" as="sz" hint-placeholder-count="4">
+        <div onClick="{{ sz.onToggle }}" style="padding:7px 18px;border-radius:999px;border:1px solid {{ sz.border }};background:{{ sz.bg }};color:{{ sz.color }};font-size:13px;font-weight:600;cursor:pointer;font-family:'Space Grotesk',sans-serif">{{ sz.label }}</div>
+      </sc-for>
+    </div>
+  </div>
+  <div style="background:#1b1a17;border:1px solid #2a2721;border-radius:12px;overflow:hidden;margin:0 0 16px">
+    <div style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;padding:16px 18px 12px">Preview SKU</div>
+    <sc-if value="{{ hasSkuPrev }}" hint-placeholder-val="{{ false }}">
+      <div style="display:grid;grid-template-columns:1.3fr 70px 1.6fr;gap:12px;padding:8px 18px;border-bottom:1px solid #2a2721;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#8f887b;font-weight:600">
+        <div>Colorway</div><div>Size</div><div>Kode SKU</div>
+      </div>
+      <sc-for list="{{ skuPrev }}" as="sp" hint-placeholder-count="4">
+        <div style="display:grid;grid-template-columns:1.3fr 70px 1.6fr;gap:12px;padding:6px 18px;border-top:1px solid rgba(255,255,255,.045);align-items:center">
+          <div>{{ sp.cw }}</div>
+          <div style="font-family:'Space Grotesk',sans-serif">{{ sp.size }}</div>
+          <input value="{{ sp.value }}" onChange="{{ sp.onChange }}" style="width:100%;background:#211f1a;border:1px solid #2e2b25;border-radius:7px;color:#edeae3;padding:6px 9px;font-size:12.5px;outline:none;font-family:'Space Grotesk',sans-serif" style-focus="border-color:var(--ac)">
+        </div>
+      </sc-for>
+    </sc-if>
+    <sc-if value="{{ noSkuPrev }}" hint-placeholder-val="{{ true }}">
+      <div style="padding:0 18px 18px;color:#6e685e;font-size:12.5px">Isi kode style, minimal satu colorway (dengan kode), dan pilih size untuk melihat preview SKU.</div>
+    </sc-if>
+  </div>
+  <div style="display:flex;justify-content:flex-end;gap:10px">
+    <button onClick="{{ cancelStyleCreate }}" style="background:transparent;border:1px solid #2e2b25;color:#c9c2b4;border-radius:8px;padding:9px 16px;font-size:13px;cursor:pointer;font-family:inherit" style-hover="border-color:#4a453c">Batal</button>
+    <button onClick="{{ submitStyle }}" style="background:var(--ac);color:#171512;border:none;border-radius:8px;padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit" style-hover="filter:brightness(1.08)">Simpan Style</button>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isStyleDetail }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Detail Style">
+  <div onClick="{{ backToStyles }}" style="color:#8f887b;font-size:12.5px;cursor:pointer;margin:0 0 10px" style-hover="color:#edeae3">← Styles</div>
+  <div style="margin:0 0 20px">
+    <h1 style="font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:600;margin:0;letter-spacing:-.01em">{{ sdName }}</h1>
+    <div style="color:#8f887b;font-size:12.5px;margin-top:4px">{{ sdSub }}</div>
+  </div>
+  <div style="background:#1b1a17;border:1px solid #2a2721;border-radius:12px;overflow:hidden;max-width:820px">
+    <div style="display:grid;grid-template-columns:1.5fr 1.2fr 70px 130px;gap:12px;padding:11px 16px;border-bottom:1px solid #2a2721;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#8f887b;font-weight:600">
+      <div>Kode SKU</div><div>Colorway</div><div>Size</div><div>Status</div>
+    </div>
+    <sc-for list="{{ sdSkuRows }}" as="k" hint-placeholder-count="6">
+      <div style="display:grid;grid-template-columns:1.5fr 1.2fr 70px 130px;gap:12px;padding:var(--rp) 16px;border-top:1px solid rgba(255,255,255,.045);align-items:center">
+        <div style="font-family:'Space Grotesk',sans-serif;font-weight:500">{{ k.code }}</div>
+        <div style="color:#c9c2b4">{{ k.cw }}</div>
+        <div style="font-family:'Space Grotesk',sans-serif">{{ k.size }}</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div onClick="{{ k.onToggle }}" style="width:34px;height:20px;border-radius:999px;background:{{ k.tBg }};position:relative;cursor:pointer;transition:background .15s;flex:none">
+            <div style="position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:{{ k.knobBg }};transform:{{ k.knob }};transition:transform .15s"></div>
+          </div>
+          <span style="font-size:11.5px;color:{{ k.statusColor }}">{{ k.statusLabel }}</span>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isStock }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Stok">
+  <div style="margin:0 0 20px">
+    <h1 style="font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:600;margin:0;letter-spacing:-.01em">Stok</h1>
+    <div style="color:#8f887b;font-size:12.5px;margin-top:4px">{{ stockSub }}</div>
+  </div>
+  <div style="display:grid;grid-template-columns:1.1fr 1.7fr;gap:12px;align-items:start">
+    <div style="background:#1b1a17;border:1px solid #2a2721;border-radius:12px;overflow:hidden">
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;padding:14px 16px 10px">Saldo SKU</div>
+      <div style="display:grid;grid-template-columns:1fr 90px;gap:12px;padding:8px 16px;border-bottom:1px solid #2a2721;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#8f887b;font-weight:600">
+        <div>Kode SKU</div><div style="text-align:right">Saldo</div>
+      </div>
+      <div style="max-height:560px;overflow-y:auto">
+        <sc-for list="{{ stockRows }}" as="b" hint-placeholder-count="10">
+          <div style="display:grid;grid-template-columns:1fr 90px;gap:12px;padding:var(--rp) 16px;border-top:1px solid rgba(255,255,255,.045);align-items:center">
+            <div style="font-family:'Space Grotesk',sans-serif;font-weight:500;font-size:12.5px">{{ b.code }}</div>
+            <div style="text-align:right;font-family:'Space Grotesk',sans-serif;font-weight:600;color:{{ b.balColor }}">{{ b.bal }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="background:#1b1a17;border:1px solid #2a2721;border-radius:12px;padding:18px">
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;margin:0 0 12px">Penyesuaian Stok</div>
+        <div style="display:grid;grid-template-columns:1.5fr 100px 1.4fr auto;gap:10px;align-items:end">
+          <div>
+            <label style="display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#8f887b;font-weight:600;margin:0 0 6px">SKU</label>
+            <select value="{{ adjSku }}" onChange="{{ onAdjSku }}" style="width:100%;background:#211f1a;border:1px solid #2e2b25;border-radius:8px;color:#edeae3;padding:9px 11px;font-size:13px;outline:none;font-family:inherit">
+              <option value="">Pilih SKU…</option>
+              <sc-for list="{{ skuOptions }}" as="o"><option value="{{ o.id }}">{{ o.label }}</option></sc-for>
+            </select>
+          </div>
+          <div>
+            <label style="display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#8f887b;font-weight:600;margin:0 0 6px">Qty (±)</label>
+            <input type="number" value="{{ adjQty }}" onChange="{{ onAdjQty }}" placeholder="-2" style="width:100%;background:#211f1a;border:1px solid #2e2b25;border-radius:8px;color:#edeae3;padding:9px 11px;font-size:13px;outline:none;font-family:inherit" style-focus="border-color:var(--ac)">
+          </div>
+          <div>
+            <label style="display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#8f887b;font-weight:600;margin:0 0 6px">Alasan</label>
+            <input value="{{ adjReason }}" onChange="{{ onAdjReason }}" placeholder="Stock opname" style="width:100%;background:#211f1a;border:1px solid #2e2b25;border-radius:8px;color:#edeae3;padding:9px 11px;font-size:13px;outline:none;font-family:inherit" style-focus="border-color:var(--ac)">
+          </div>
+          <button onClick="{{ submitAdj }}" style="background:var(--ac);color:#171512;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;height:37px" style-hover="filter:brightness(1.08)">Simpan</button>
+        </div>
+      </div>
+      <div style="background:#1b1a17;border:1px solid #2a2721;border-radius:12px;overflow:hidden">
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;padding:14px 16px 10px">Pergerakan Terakhir</div>
+        <div style="display:grid;grid-template-columns:1.3fr 130px 60px 1.4fr;gap:12px;padding:8px 16px;border-bottom:1px solid #2a2721;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#8f887b;font-weight:600">
+          <div>Kode SKU</div><div>Tipe</div><div style="text-align:right">Qty</div><div>Alasan</div>
+        </div>
+        <sc-for list="{{ movRows }}" as="mv" hint-placeholder-count="6">
+          <div style="display:grid;grid-template-columns:1.3fr 130px 60px 1.4fr;gap:12px;padding:var(--rp) 16px;border-top:1px solid rgba(255,255,255,.045);align-items:center">
+            <div style="font-family:'Space Grotesk',sans-serif;font-weight:500;font-size:12.5px">{{ mv.code }}</div>
+            <div><span style="display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:600;background:{{ mv.chipBg }};color:{{ mv.chipColor }}">{{ mv.label }}</span></div>
+            <div style="text-align:right;font-family:'Space Grotesk',sans-serif;font-weight:600;color:{{ mv.qtyColor }}">{{ mv.qty }}</div>
+            <div style="color:#8f887b;font-size:12.5px">{{ mv.reason }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isProdList }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Produksi">
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;margin:0 0 20px">
+    <div>
+      <h1 style="font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:600;margin:0;letter-spacing:-.01em">Produksi</h1>
+      <div style="color:#8f887b;font-size:12.5px;margin-top:4px">{{ prodSub }}</div>
+    </div>
+    <button onClick="{{ goProdCreate }}" style="background:var(--ac);color:#171512;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit" style-hover="filter:brightness(1.08)">+ Order Produksi</button>
+  </div>
+  <div style="background:#1b1a17;border:1px solid #2a2721;border-radius:12px;overflow:hidden">
+    <div style="display:grid;grid-template-columns:130px 110px 1.5fr 140px 110px;gap:12px;padding:11px 16px;border-bottom:1px solid #2a2721;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#8f887b;font-weight:600">
+      <div>Kode</div><div>Style</div><div>Vendor</div><div>Stage</div><div>Deadline</div>
+    </div>
+    <sc-for list="{{ prodRows }}" as="p" hint-placeholder-count="4">
+      <div onClick="{{ p.open }}" style="display:grid;grid-template-columns:130px 110px 1.5fr 140px 110px;gap:12px;padding:var(--rp) 16px;border-top:1px solid rgba(255,255,255,.045);align-items:center;cursor:pointer" style-hover="background:rgba(255,255,255,.025)">
+        <div style="font-family:'Space Grotesk',sans-serif;font-weight:500;color:var(--ac)">{{ p.code }}</div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:12.5px">{{ p.style }}</div>
+        <div>{{ p.vendor }}</div>
+        <div><span style="display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:600;background:{{ p.stBg }};color:{{ p.stColor }}">{{ p.stageLabel }}</span></div>
+        <div style="color:#8f887b;font-size:12.5px">{{ p.deadline }}</div>
+      </div>
+    </sc-for>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isProdCreate }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Order Produksi Baru" style="max-width:780px">
+  <div onClick="{{ cancelProd }}" style="color:#8f887b;font-size:12.5px;cursor:pointer;margin:0 0 10px" style-hover="color:#edeae3">← Produksi</div>
+  <div style="margin:0 0 20px">
+    <h1 style="font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:600;margin:0;letter-spacing:-.01em">Order Produksi Baru</h1>
+    <div style="color:#8f887b;font-size:12.5px;margin-top:4px">Order dimulai di stage Trial</div>
+  </div>
+  <div style="background:#1b1a17;border:1px solid #2a2721;border-radius:12px;padding:18px;margin:0 0 12px">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 0 12px">
+      <div>
+        <label style="display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#8f887b;font-weight:600;margin:0 0 6px">Style</label>
+        <select value="{{ pfStyle }}" onChange="{{ onPfStyle }}" style="width:100%;background:#211f1a;border:1px solid #2e2b25;border-radius:8px;color:#edeae3;padding:9px 11px;font-size:13px;outline:none;font-family:inherit">
+          <option value="">Pilih style…</option>
+          <sc-for list="{{ styleOptions }}" as="o"><option value="{{ o.id }}">{{ o.label }}</option></sc-for>
+        </select>
+      </div>
+      <div>
+        <label style="display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#8f887b;font-weight:600;margin:0 0 6px">Vendor</label>
+        <select value="{{ pfVendor }}" onChange="{{ onPfVendor }}" style="width:100%;background:#211f1a;border:1px solid #2e2b25;border-radius:8px;color:#edeae3;padding:9px 11px;font-size:13px;outline:none;font-family:inherit">
+          <option value="">Pilih vendor…</option>
+          <sc-for list="{{ vendorOptions }}" as="o"><option value="{{ o.id }}">{{ o.label }}</option></sc-for>
+        </select>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div>
+        <label style="display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#8f887b;font-weight:600;margin:0 0 6px">Deadline</label>
+        <input type="date" value="{{ pfDeadline }}" onChange="{{ onPfDeadline }}" style="width:100%;background:#211f1a;border:1px solid #2e2b25;border-radius:8px;color:#edeae3;padding:8px 11px;font-size:13px;outline:none;font-family:inherit;color-scheme:dark" style-focus="border-color:var(--ac)">
+      </div>
+      <div>
+        <label style="display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#8f887b;font-weight:600;margin:0 0 6px">Catatan</label>
+        <input value="{{ pfNotes }}" onChange="{{ onPfNotes }}" placeholder="Catatan produksi" style="width:100%;background:#211f1a;border:1px solid #2e2b25;border-radius:8px;color:#edeae3;padding:9px 11px;font-size:13px;outline:none;font-family:inherit" style-focus="border-color:var(--ac)">
+      </div>
+    </div>
+  </div>
+  <div style="background:#1b1a17;border:1px solid #2a2721;border-radius:12px;padding:18px;margin:0 0 16px">
+    <div style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;margin:0 0 12px">Line Produksi</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <sc-for list="{{ plRows }}" as="ln" hint-placeholder-count="1">
+        <div style="display:grid;grid-template-columns:1.7fr 110px 34px;gap:8px;align-items:center">
+          <select value="{{ ln.skuId }}" onChange="{{ ln.onSku }}" style="width:100%;background:#211f1a;border:1px solid #2e2b25;border-radius:8px;color:#edeae3;padding:9px 11px;font-size:13px;outline:none;font-family:inherit">
+            <option value="">Pilih SKU…</option>
+            <sc-for list="{{ skuOptions }}" as="o"><option value="{{ o.id }}">{{ o.label }}</option></sc-for>
+          </select>
+          <input type="number" value="{{ ln.qty }}" onChange="{{ ln.onQty }}" placeholder="Qty" style="width:100%;background:#211f1a;border:1px solid #2e2b25;border-radius:8px;color:#edeae3;padding:9px 11px;font-size:13px;outline:none;font-family:inherit" style-focus="border-color:var(--ac)">
+          <button onClick="{{ ln.onRemove }}" style="width:34px;height:34px;background:transparent;border:1px solid #2e2b25;color:#8f887b;border-radius:8px;cursor:pointer;font-size:15px;font-family:inherit" style-hover="border-color:#5a3434;color:#ff9b9b">×</button>
+        </div>
+      </sc-for>
+    </div>
+    <button onClick="{{ addPl }}" style="margin-top:10px;width:100%;background:transparent;border:1px dashed #3a362e;color:#8f887b;border-radius:8px;padding:9px;font-size:12.5px;cursor:pointer;font-family:inherit" style-hover="color:#edeae3;border-color:#4a453c">+ Tambah line</button>
+  </div>
+  <div style="display:flex;justify-content:flex-end;gap:10px">
+    <button onClick="{{ cancelProd }}" style="background:transparent;border:1px solid #2e2b25;color:#c9c2b4;border-radius:8px;padding:9px 16px;font-size:13px;cursor:pointer;font-family:inherit" style-hover="border-color:#4a453c">Batal</button>
+    <button onClick="{{ submitProd }}" style="background:var(--ac);color:#171512;border:none;border-radius:8px;padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit" style-hover="filter:brightness(1.08)">Buat Order Produksi</button>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isProdDetail }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Detail Produksi">
+  <div onClick="{{ backToProd }}" style="color:#8f887b;font-size:12.5px;cursor:pointer;margin:0 0 10px" style-hover="color:#edeae3">← Produksi</div>
+  <div style="margin:0 0 16px">
+    <h1 style="font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:600;margin:0;letter-spacing:-.01em">{{ pdCode }}</h1>
+    <div style="color:#8f887b;font-size:12.5px;margin-top:4px">{{ pdSub }}</div>
+  </div>
+  <sc-if value="{{ isPdCanceled }}" hint-placeholder-val="{{ false }}">
+    <div style="border:1px solid #5a3434;background:rgba(255,155,155,.07);color:#ff9b9b;padding:12px 16px;border-radius:10px;margin:0 0 12px;font-size:13px">Order produksi ini dibatalkan.</div>
+  </sc-if>
+  <sc-if value="{{ notPdCanceled }}" hint-placeholder-val="{{ true }}">
+    <div style="background:#1b1a17;border:1px solid #2a2721;border-radius:12px;padding:18px 20px;margin:0 0 12px">
+      <div style="display:flex;align-items:center;flex-wrap:wrap">
+        <sc-for list="{{ stageSteps }}" as="sp" hint-placeholder-count="4">
+          <div style="display:flex;align-items:center">
+            <div style="width:{{ sp.lineW }};height:2px;background:{{ sp.lineBg }};margin:0 10px"></div>
+            <div style="width:10px;height:10px;border-radius:50%;background:{{ sp.dotBg }};border:2px solid {{ sp.dotBorder }};flex:none"></div>
+            <div style="margin-left:8px;font-size:12.5px;font-weight:{{ sp.fw }};color:{{ sp.color }}">{{ sp.label }}</div>
+          </div>
+        </sc-for>
+      </div>
+      <sc-if value="{{ hasNextBtns }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;gap:10px;margin-top:16px">
+          <sc-for list="{{ nextBtns }}" as="nb" hint-placeholder-count="2">
+            <button onClick="{{ nb.onClick }}" style="background:{{ nb.bg }};color:{{ nb.color }};border:1px solid {{ nb.border }};border-radius:8px;padding:8px 14px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit" style-hover="filter:brightness(1.1)">{{ nb.label }}</button>
+          </sc-for>
+        </div>
+      </sc-if>
+      <sc-if value="{{ hasPdNotes }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-top:14px;color:#8f887b;font-size:12.5px;border-top:1px solid rgba(255,255,255,.045);padding-top:12px">Catatan: {{ pdNotes }}</div>
+      </sc-if>
+    </div>
+  </sc-if>
+  <div style="background:#1b1a17;border:1px solid #2a2721;border-radius:12px;overflow:hidden;margin:0 0 12px">
+    <div style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;padding:14px 16px 10px">Line Produksi</div>
+    <div style="display:grid;grid-template-columns:1.5fr 90px 110px 100px 90px;gap:12px;padding:8px 16px;border-bottom:1px solid #2a2721;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#8f887b;font-weight:600">
+      <div>Kode SKU</div><div style="text-align:right">Order</div><div>Diterima</div><div>Reject</div><div></div>
+    </div>
+    <sc-for list="{{ pdLines }}" as="ln" hint-placeholder-count="3">
+      <div style="display:grid;grid-template-columns:1.5fr 90px 110px 100px 90px;gap:12px;padding:6px 16px;border-top:1px solid rgba(255,255,255,.045);align-items:center">
+        <div style="font-family:'Space Grotesk',sans-serif;font-weight:500">{{ ln.code }}</div>
+        <div style="text-align:right;font-family:'Space Grotesk',sans-serif">{{ ln.ordered }}</div>
+        <input type="number" value="{{ ln.received }}" onChange="{{ ln.onReceived }}" style="width:84px;background:#211f1a;border:1px solid #2e2b25;border-radius:7px;color:#edeae3;padding:6px 9px;font-size:12.5px;outline:none;font-family:'Space Grotesk',sans-serif" style-focus="border-color:var(--ac)">
+        <input type="number" value="{{ ln.reject }}" onChange="{{ ln.onReject }}" style="width:74px;background:#211f1a;border:1px solid #2e2b25;border-radius:7px;color:#edeae3;padding:6px 9px;font-size:12.5px;outline:none;font-family:'Space Grotesk',sans-serif" style-focus="border-color:var(--ac)">
+        <button onClick="{{ ln.onSave }}" style="background:transparent;border:1px solid var(--ac);color:var(--ac);border-radius:7px;padding:5px 12px;font-size:11.5px;font-weight:600;cursor:pointer;font-family:inherit" style-hover="background:rgba(227,196,110,.1)">Simpan</button>
+      </div>
+    </sc-for>
+  </div>
+  <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:12px;align-items:start">
+    <div style="background:#1b1a17;border:1px solid #2a2721;border-radius:12px;overflow:hidden">
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;padding:14px 16px 10px">Biaya Produksi</div>
+      <sc-if value="{{ hasCosts }}" hint-placeholder-val="{{ true }}">
+        <div style="display:grid;grid-template-columns:110px 1fr 130px;gap:12px;padding:8px 16px;border-bottom:1px solid #2a2721;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#8f887b;font-weight:600">
+          <div>Tipe</div><div>Catatan</div><div style="text-align:right">Jumlah</div>
+        </div>
+        <sc-for list="{{ costRows }}" as="c" hint-placeholder-count="3">
+          <div style="display:grid;grid-template-columns:110px 1fr 130px;gap:12px;padding:var(--rp) 16px;border-top:1px solid rgba(255,255,255,.045);align-items:center">
+            <div style="font-weight:500;font-size:12.5px">{{ c.type }}</div>
+            <div style="color:#8f887b;font-size:12.5px">{{ c.note }}</div>
+            <div style="text-align:right;font-family:'Space Grotesk',sans-serif;font-weight:500">{{ c.amount }}</div>
+          </div>
+        </sc-for>
+        <div style="display:grid;grid-template-columns:1fr 140px;gap:12px;padding:11px 16px;border-top:1px solid #2a2721;align-items:center">
+          <div style="font-weight:600;font-size:12.5px">Total</div>
+          <div style="text-align:right;font-family:'Space Grotesk',sans-serif;font-weight:600;color:var(--ac)">{{ costTotal }}</div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ noCosts }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:20px 16px;color:#6e685e;font-size:12.5px">Belum ada biaya tercatat.</div>
+      </sc-if>
+    </div>
+    <div style="background:#1b1a17;border:1px solid #2a2721;border-radius:12px;padding:18px">
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;margin:0 0 12px">Tambah Biaya</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div>
+          <label style="display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#8f887b;font-weight:600;margin:0 0 6px">Tipe</label>
+          <select value="{{ cfType }}" onChange="{{ onCfType }}" style="width:100%;background:#211f1a;border:1px solid #2e2b25;border-radius:8px;color:#edeae3;padding:9px 11px;font-size:13px;outline:none;font-family:inherit">
+            <option value="material">Material</option>
+            <option value="cmt">CMT (Jahit)</option>
+            <option value="overhead">Overhead</option>
+            <option value="other">Lainnya</option>
+          </select>
+        </div>
+        <div>
+          <label style="display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#8f887b;font-weight:600;margin:0 0 6px">Jumlah (Rp)</label>
+          <input type="number" value="{{ cfAmount }}" onChange="{{ onCfAmount }}" placeholder="5000000" style="width:100%;background:#211f1a;border:1px solid #2e2b25;border-radius:8px;color:#edeae3;padding:9px 11px;font-size:13px;outline:none;font-family:inherit" style-focus="border-color:var(--ac)">
+        </div>
+        <div>
+          <label style="display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#8f887b;font-weight:600;margin:0 0 6px">Catatan</label>
+          <input value="{{ cfNote }}" onChange="{{ onCfNote }}" placeholder="Kain + aksesoris" style="width:100%;background:#211f1a;border:1px solid #2e2b25;border-radius:8px;color:#edeae3;padding:9px 11px;font-size:13px;outline:none;font-family:inherit" style-focus="border-color:var(--ac)">
+        </div>
+        <button onClick="{{ addCost }}" style="background:var(--ac);color:#171512;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;align-self:flex-end" style-hover="filter:brightness(1.08)">Tambah</button>
+      </div>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isVendors }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Vendor">
+  <div style="margin:0 0 20px">
+    <h1 style="font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:600;margin:0;letter-spacing:-.01em">Vendor</h1>
+    <div style="color:#8f887b;font-size:12.5px;margin-top:4px">{{ vendorsSub }}</div>
+  </div>
+  <div style="display:grid;grid-template-columns:1.6fr 1fr;gap:12px;align-items:start">
+    <div style="background:#1b1a17;border:1px solid #2a2721;border-radius:12px;overflow:hidden">
+      <div style="display:grid;grid-template-columns:1.4fr 1.4fr 100px;gap:12px;padding:11px 16px;border-bottom:1px solid #2a2721;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#8f887b;font-weight:600">
+        <div>Nama</div><div>Kontak</div><div>Status</div>
+      </div>
+      <sc-for list="{{ vendorRows }}" as="v" hint-placeholder-count="3">
+        <div style="display:grid;grid-template-columns:1.4fr 1.4fr 100px;gap:12px;padding:var(--rp) 16px;border-top:1px solid rgba(255,255,255,.045);align-items:center">
+          <div style="font-weight:500">{{ v.name }}</div>
+          <div style="color:#8f887b;font-size:12.5px">{{ v.contact }}</div>
+          <div><span style="display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:600;background:{{ v.stBg }};color:{{ v.stColor }}">{{ v.stLabel }}</span></div>
+        </div>
+      </sc-for>
+    </div>
+    <div style="background:#1b1a17;border:1px solid #2a2721;border-radius:12px;padding:18px">
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;margin:0 0 12px">Vendor Baru</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div>
+          <label style="display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#8f887b;font-weight:600;margin:0 0 6px">Nama</label>
+          <input value="{{ vfName }}" onChange="{{ onVfName }}" placeholder="CV Maju Garmen" style="width:100%;background:#211f1a;border:1px solid #2e2b25;border-radius:8px;color:#edeae3;padding:9px 11px;font-size:13px;outline:none;font-family:inherit" style-focus="border-color:var(--ac)">
+        </div>
+        <div>
+          <label style="display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#8f887b;font-weight:600;margin:0 0 6px">Kontak</label>
+          <input value="{{ vfContact }}" onChange="{{ onVfContact }}" placeholder="Pak Budi · 0812-xxxx-xxxx" style="width:100%;background:#211f1a;border:1px solid #2e2b25;border-radius:8px;color:#edeae3;padding:9px 11px;font-size:13px;outline:none;font-family:inherit" style-focus="border-color:var(--ac)">
+        </div>
+        <button onClick="{{ submitVendor }}" style="background:var(--ac);color:#171512;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;align-self:flex-end" style-hover="filter:brightness(1.08)">Simpan Vendor</button>
+      </div>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isCosting }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="HPP Costing">
+  <div style="margin:0 0 20px">
+    <h1 style="font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:600;margin:0;letter-spacing:-.01em">HPP / Costing</h1>
+    <div style="color:#8f887b;font-size:12.5px;margin-top:4px">{{ costingSub }}</div>
+  </div>
+  <div style="background:#1b1a17;border:1px solid #2a2721;border-radius:12px;overflow:hidden;max-width:720px">
+    <div style="display:grid;grid-template-columns:1.5fr 150px 120px;gap:12px;padding:11px 16px;border-bottom:1px solid #2a2721;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#8f887b;font-weight:600">
+      <div>Kode SKU</div><div style="text-align:right">HPP</div><div style="text-align:right">Unit Costed</div>
+    </div>
+    <div style="max-height:600px;overflow-y:auto">
+      <sc-for list="{{ hppRows }}" as="h" hint-placeholder-count="10">
+        <div style="display:grid;grid-template-columns:1.5fr 150px 120px;gap:12px;padding:var(--rp) 16px;border-top:1px solid rgba(255,255,255,.045);align-items:center">
+          <div style="font-family:'Space Grotesk',sans-serif;font-weight:500;font-size:12.5px">{{ h.code }}</div>
+          <div style="text-align:right;font-family:'Space Grotesk',sans-serif;font-weight:500;color:{{ h.hppColor }}">{{ h.hpp }}</div>
+          <div style="text-align:right;font-family:'Space Grotesk',sans-serif;color:#8f887b">{{ h.units }}</div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isOrdersList }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Order">
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;margin:0 0 20px">
+    <div>
+      <h1 style="font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:600;margin:0;letter-spacing:-.01em">Order</h1>
+      <div style="color:#8f887b;font-size:12.5px;margin-top:4px">{{ ordersSub }}</div>
+    </div>
+    <button onClick="{{ goOrderCreate }}" style="background:var(--ac);color:#171512;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit" style-hover="filter:brightness(1.08)">+ Order Baru</button>
+  </div>
+  <div style="background:#1b1a17;border:1px solid #2a2721;border-radius:12px;overflow:hidden;max-width:900px">
+    <div style="display:grid;grid-template-columns:140px 1.2fr 120px 140px;gap:12px;padding:11px 16px;border-bottom:1px solid #2a2721;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#8f887b;font-weight:600">
+      <div>Kode</div><div>Channel</div><div>Tanggal</div><div style="text-align:right">Total</div>
+    </div>
+    <sc-for list="{{ orderRows }}" as="o" hint-placeholder-count="6">
+      <div onClick="{{ o.open }}" style="display:grid;grid-template-columns:140px 1.2fr 120px 140px;gap:12px;padding:var(--rp) 16px;border-top:1px solid rgba(255,255,255,.045);align-items:center;cursor:pointer" style-hover="background:rgba(255,255,255,.025)">
+        <div style="font-family:'Space Grotesk',sans-serif;font-weight:500;color:var(--ac)">{{ o.code }}</div>
+        <div>{{ o.channel }}</div>
+        <div style="color:#8f887b;font-size:12.5px">{{ o.date }}</div>
+        <div style="text-align:right;font-family:'Space Grotesk',sans-serif;font-weight:500">{{ o.total }}</div>
+      </div>
+    </sc-for>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isOrderCreate }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Order Baru" style="max-width:820px">
+  <div onClick="{{ cancelOrder }}" style="color:#8f887b;font-size:12.5px;cursor:pointer;margin:0 0 10px" style-hover="color:#edeae3">← Order</div>
+  <div style="margin:0 0 20px">
+    <h1 style="font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:600;margin:0;letter-spacing:-.01em">Order Baru</h1>
+    <div style="color:#8f887b;font-size:12.5px;margin-top:4px">Stok berkurang otomatis saat order disimpan</div>
+  </div>
+  <div style="background:#1b1a17;border:1px solid #2a2721;border-radius:12px;padding:18px;margin:0 0 12px">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 0 12px">
+      <div>
+        <label style="display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#8f887b;font-weight:600;margin:0 0 6px">Channel</label>
+        <select value="{{ ofChannel }}" onChange="{{ onOfChannel }}" style="width:100%;background:#211f1a;border:1px solid #2e2b25;border-radius:8px;color:#edeae3;padding:9px 11px;font-size:13px;outline:none;font-family:inherit">
+          <option value="">Pilih channel…</option>
+          <sc-for list="{{ channelOptions }}" as="o"><option value="{{ o.id }}">{{ o.label }}</option></sc-for>
+        </select>
+      </div>
+      <div>
+        <label style="display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#8f887b;font-weight:600;margin:0 0 6px">Tanggal</label>
+        <input type="date" value="{{ ofDate }}" onChange="{{ onOfDate }}" style="width:100%;background:#211f1a;border:1px solid #2e2b25;border-radius:8px;color:#edeae3;padding:8px 11px;font-size:13px;outline:none;font-family:inherit;color-scheme:dark" style-focus="border-color:var(--ac)">
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div>
+        <label style="display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#8f887b;font-weight:600;margin:0 0 6px">Customer</label>
+        <input value="{{ ofCustomer }}" onChange="{{ onOfCustomer }}" placeholder="Nama customer" style="width:100%;background:#211f1a;border:1px solid #2e2b25;border-radius:8px;color:#edeae3;padding:9px 11px;font-size:13px;outline:none;font-family:inherit" style-focus="border-color:var(--ac)">
+      </div>
+      <div>
+        <label style="display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#8f887b;font-weight:600;margin:0 0 6px">Catatan</label>
+        <input value="{{ ofNotes }}" onChange="{{ onOfNotes }}" placeholder="Opsional" style="width:100%;background:#211f1a;border:1px solid #2e2b25;border-radius:8px;color:#edeae3;padding:9px 11px;font-size:13px;outline:none;font-family:inherit" style-focus="border-color:var(--ac)">
+      </div>
+    </div>
+  </div>
+  <div style="background:#1b1a17;border:1px solid #2a2721;border-radius:12px;padding:18px;margin:0 0 16px">
+    <div style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;margin:0 0 12px">Line Order</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <sc-for list="{{ olRows }}" as="ln" hint-placeholder-count="1">
+        <div style="display:grid;grid-template-columns:1.7fr 80px 140px 120px 34px;gap:8px;align-items:center">
+          <select value="{{ ln.skuId }}" onChange="{{ ln.onSku }}" style="width:100%;background:#211f1a;border:1px solid #2e2b25;border-radius:8px;color:#edeae3;padding:9px 11px;font-size:13px;outline:none;font-family:inherit">
+            <option value="">Pilih SKU…</option>
+            <sc-for list="{{ skuOptions }}" as="o"><option value="{{ o.id }}">{{ o.label }}</option></sc-for>
+          </select>
+          <input type="number" value="{{ ln.qty }}" onChange="{{ ln.onQty }}" placeholder="Qty" style="width:100%;background:#211f1a;border:1px solid #2e2b25;border-radius:8px;color:#edeae3;padding:9px 11px;font-size:13px;outline:none;font-family:inherit" style-focus="border-color:var(--ac)">
+          <input type="number" value="{{ ln.price }}" onChange="{{ ln.onPrice }}" placeholder="Harga" style="width:100%;background:#211f1a;border:1px solid #2e2b25;border-radius:8px;color:#edeae3;padding:9px 11px;font-size:13px;outline:none;font-family:inherit" style-focus="border-color:var(--ac)">
+          <div style="text-align:right;font-family:'Space Grotesk',sans-serif;font-size:12.5px;color:#c9c2b4">{{ ln.subtotal }}</div>
+          <button onClick="{{ ln.onRemove }}" style="width:34px;height:34px;background:transparent;border:1px solid #2e2b25;color:#8f887b;border-radius:8px;cursor:pointer;font-size:15px;font-family:inherit" style-hover="border-color:#5a3434;color:#ff9b9b">×</button>
+        </div>
+      </sc-for>
+    </div>
+    <button onClick="{{ addOl }}" style="margin-top:10px;width:100%;background:transparent;border:1px dashed #3a362e;color:#8f887b;border-radius:8px;padding:9px;font-size:12.5px;cursor:pointer;font-family:inherit" style-hover="color:#edeae3;border-color:#4a453c">+ Tambah line</button>
+    <div style="display:flex;justify-content:flex-end;align-items:baseline;gap:12px;margin-top:14px;border-top:1px solid rgba(255,255,255,.045);padding-top:12px">
+      <div style="font-size:12.5px;color:#8f887b">Total</div>
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:600;color:var(--ac)">{{ orderTotal }}</div>
+    </div>
+  </div>
+  <div style="display:flex;justify-content:flex-end;gap:10px">
+    <button onClick="{{ cancelOrder }}" style="background:transparent;border:1px solid #2e2b25;color:#c9c2b4;border-radius:8px;padding:9px 16px;font-size:13px;cursor:pointer;font-family:inherit" style-hover="border-color:#4a453c">Batal</button>
+    <button onClick="{{ submitOrder }}" style="background:var(--ac);color:#171512;border:none;border-radius:8px;padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit" style-hover="filter:brightness(1.08)">Simpan Order</button>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isOrderDetail }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Detail Order">
+  <div onClick="{{ backToOrders }}" style="color:#8f887b;font-size:12.5px;cursor:pointer;margin:0 0 10px" style-hover="color:#edeae3">← Order</div>
+  <div style="margin:0 0 20px">
+    <h1 style="font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:600;margin:0;letter-spacing:-.01em">{{ odCode }}</h1>
+    <div style="color:#8f887b;font-size:12.5px;margin-top:4px">{{ odSub }}</div>
+  </div>
+  <div style="background:#1b1a17;border:1px solid #2a2721;border-radius:12px;overflow:hidden;max-width:760px">
+    <div style="display:grid;grid-template-columns:1.5fr 70px 140px 140px;gap:12px;padding:11px 16px;border-bottom:1px solid #2a2721;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#8f887b;font-weight:600">
+      <div>Kode SKU</div><div style="text-align:right">Qty</div><div style="text-align:right">Harga</div><div style="text-align:right">Subtotal</div>
+    </div>
+    <sc-for list="{{ odRows }}" as="ln" hint-placeholder-count="2">
+      <div style="display:grid;grid-template-columns:1.5fr 70px 140px 140px;gap:12px;padding:var(--rp) 16px;border-top:1px solid rgba(255,255,255,.045);align-items:center">
+        <div style="font-family:'Space Grotesk',sans-serif;font-weight:500">{{ ln.code }}</div>
+        <div style="text-align:right;font-family:'Space Grotesk',sans-serif">{{ ln.qty }}</div>
+        <div style="text-align:right;font-family:'Space Grotesk',sans-serif">{{ ln.price }}</div>
+        <div style="text-align:right;font-family:'Space Grotesk',sans-serif;font-weight:500">{{ ln.subtotal }}</div>
+      </div>
+    </sc-for>
+    <div style="display:grid;grid-template-columns:1fr 160px;gap:12px;padding:12px 16px;border-top:1px solid #2a2721;align-items:center">
+      <div style="font-weight:600;font-size:12.5px">Total</div>
+      <div style="text-align:right;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:15px;color:var(--ac)">{{ odTotal }}</div>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isChannels }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Channel">
+  <div style="margin:0 0 20px">
+    <h1 style="font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:600;margin:0;letter-spacing:-.01em">Channel</h1>
+    <div style="color:#8f887b;font-size:12.5px;margin-top:4px">{{ channelsSub }}</div>
+  </div>
+  <div style="display:grid;grid-template-columns:1.3fr 1fr;gap:12px;align-items:start;max-width:900px">
+    <div style="background:#1b1a17;border:1px solid #2a2721;border-radius:12px;overflow:hidden">
+      <div style="display:grid;grid-template-columns:1fr 100px;gap:12px;padding:11px 16px;border-bottom:1px solid #2a2721;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#8f887b;font-weight:600">
+        <div>Nama</div><div>Status</div>
+      </div>
+      <sc-for list="{{ channelRows }}" as="c" hint-placeholder-count="5">
+        <div style="display:grid;grid-template-columns:1fr 100px;gap:12px;padding:var(--rp) 16px;border-top:1px solid rgba(255,255,255,.045);align-items:center">
+          <div style="font-weight:500">{{ c.name }}</div>
+          <div><span style="display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:600;background:{{ c.stBg }};color:{{ c.stColor }}">{{ c.stLabel }}</span></div>
+        </div>
+      </sc-for>
+    </div>
+    <div style="background:#1b1a17;border:1px solid #2a2721;border-radius:12px;padding:18px">
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;margin:0 0 12px">Channel Baru</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div>
+          <label style="display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#8f887b;font-weight:600;margin:0 0 6px">Nama</label>
+          <input value="{{ chName }}" onChange="{{ onChName }}" placeholder="Zalora" style="width:100%;background:#211f1a;border:1px solid #2e2b25;border-radius:8px;color:#edeae3;padding:9px 11px;font-size:13px;outline:none;font-family:inherit" style-focus="border-color:var(--ac)">
+        </div>
+        <button onClick="{{ submitChannel }}" style="background:var(--ac);color:#171512;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;align-self:flex-end" style-hover="filter:brightness(1.08)">Simpan Channel</button>
+      </div>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isReturnsList }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Retur">
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;margin:0 0 20px">
+    <div>
+      <h1 style="font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:600;margin:0;letter-spacing:-.01em">Retur</h1>
+      <div style="color:#8f887b;font-size:12.5px;margin-top:4px">{{ returnsSub }}</div>
+    </div>
+    <button onClick="{{ goReturnCreate }}" style="background:var(--ac);color:#171512;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit" style-hover="filter:brightness(1.08)">+ Retur Baru</button>
+  </div>
+  <div style="background:#1b1a17;border:1px solid #2a2721;border-radius:12px;overflow:hidden;max-width:900px">
+    <div style="display:grid;grid-template-columns:130px 140px 120px 1.5fr;gap:12px;padding:11px 16px;border-bottom:1px solid #2a2721;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#8f887b;font-weight:600">
+      <div>Kode</div><div>Order</div><div>Tanggal</div><div>Alasan</div>
+    </div>
+    <sc-for list="{{ returnRows }}" as="r" hint-placeholder-count="2">
+      <div onClick="{{ r.open }}" style="display:grid;grid-template-columns:130px 140px 120px 1.5fr;gap:12px;padding:var(--rp) 16px;border-top:1px solid rgba(255,255,255,.045);align-items:center;cursor:pointer" style-hover="background:rgba(255,255,255,.025)">
+        <div style="font-family:'Space Grotesk',sans-serif;font-weight:500;color:var(--ac)">{{ r.code }}</div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:12.5px">{{ r.orderCode }}</div>
+        <div style="color:#8f887b;font-size:12.5px">{{ r.date }}</div>
+        <div style="color:#c9c2b4">{{ r.reason }}</div>
+      </div>
+    </sc-for>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isReturnCreate }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Retur Baru" style="max-width:780px">
+  <div onClick="{{ cancelReturn }}" style="color:#8f887b;font-size:12.5px;cursor:pointer;margin:0 0 10px" style-hover="color:#edeae3">← Retur</div>
+  <div style="margin:0 0 20px">
+    <h1 style="font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:600;margin:0;letter-spacing:-.01em">Retur Baru</h1>
+    <div style="color:#8f887b;font-size:12.5px;margin-top:4px">Stok bertambah otomatis saat retur disimpan</div>
+  </div>
+  <div style="background:#1b1a17;border:1px solid #2a2721;border-radius:12px;padding:18px;margin:0 0 12px">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 0 12px">
+      <div>
+        <label style="display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#8f887b;font-weight:600;margin:0 0 6px">Order</label>
+        <select value="{{ rfOrder }}" onChange="{{ onRfOrder }}" style="width:100%;background:#211f1a;border:1px solid #2e2b25;border-radius:8px;color:#edeae3;padding:9px 11px;font-size:13px;outline:none;font-family:inherit">
+          <option value="">Pilih order…</option>
+          <sc-for list="{{ orderOptions }}" as="o"><option value="{{ o.id }}">{{ o.label }}</option></sc-for>
+        </select>
+      </div>
+      <div>
+        <label style="display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#8f887b;font-weight:600;margin:0 0 6px">Tanggal</label>
+        <input type="date" value="{{ rfDate }}" onChange="{{ onRfDate }}" style="width:100%;background:#211f1a;border:1px solid #2e2b25;border-radius:8px;color:#edeae3;padding:8px 11px;font-size:13px;outline:none;font-family:inherit;color-scheme:dark" style-focus="border-color:var(--ac)">
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div>
+        <label style="display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#8f887b;font-weight:600;margin:0 0 6px">Alasan</label>
+        <input value="{{ rfReason }}" onChange="{{ onRfReason }}" placeholder="Ukuran tidak sesuai" style="width:100%;background:#211f1a;border:1px solid #2e2b25;border-radius:8px;color:#edeae3;padding:9px 11px;font-size:13px;outline:none;font-family:inherit" style-focus="border-color:var(--ac)">
+      </div>
+      <div>
+        <label style="display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#8f887b;font-weight:600;margin:0 0 6px">Catatan</label>
+        <input value="{{ rfNotes }}" onChange="{{ onRfNotes }}" placeholder="Opsional" style="width:100%;background:#211f1a;border:1px solid #2e2b25;border-radius:8px;color:#edeae3;padding:9px 11px;font-size:13px;outline:none;font-family:inherit" style-focus="border-color:var(--ac)">
+      </div>
+    </div>
+  </div>
+  <div style="background:#1b1a17;border:1px solid #2a2721;border-radius:12px;padding:18px;margin:0 0 16px">
+    <div style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;margin:0 0 12px">Line Retur</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <sc-for list="{{ rlRows }}" as="ln" hint-placeholder-count="1">
+        <div style="display:grid;grid-template-columns:1.7fr 110px 34px;gap:8px;align-items:center">
+          <select value="{{ ln.skuId }}" onChange="{{ ln.onSku }}" style="width:100%;background:#211f1a;border:1px solid #2e2b25;border-radius:8px;color:#edeae3;padding:9px 11px;font-size:13px;outline:none;font-family:inherit">
+            <option value="">Pilih SKU…</option>
+            <sc-for list="{{ skuOptions }}" as="o"><option value="{{ o.id }}">{{ o.label }}</option></sc-for>
+          </select>
+          <input type="number" value="{{ ln.qty }}" onChange="{{ ln.onQty }}" placeholder="Qty" style="width:100%;background:#211f1a;border:1px solid #2e2b25;border-radius:8px;color:#edeae3;padding:9px 11px;font-size:13px;outline:none;font-family:inherit" style-focus="border-color:var(--ac)">
+          <button onClick="{{ ln.onRemove }}" style="width:34px;height:34px;background:transparent;border:1px solid #2e2b25;color:#8f887b;border-radius:8px;cursor:pointer;font-size:15px;font-family:inherit" style-hover="border-color:#5a3434;color:#ff9b9b">×</button>
+        </div>
+      </sc-for>
+    </div>
+    <button onClick="{{ addRl }}" style="margin-top:10px;width:100%;background:transparent;border:1px dashed #3a362e;color:#8f887b;border-radius:8px;padding:9px;font-size:12.5px;cursor:pointer;font-family:inherit" style-hover="color:#edeae3;border-color:#4a453c">+ Tambah line</button>
+  </div>
+  <div style="display:flex;justify-content:flex-end;gap:10px">
+    <button onClick="{{ cancelReturn }}" style="background:transparent;border:1px solid #2e2b25;color:#c9c2b4;border-radius:8px;padding:9px 16px;font-size:13px;cursor:pointer;font-family:inherit" style-hover="border-color:#4a453c">Batal</button>
+    <button onClick="{{ submitReturn }}" style="background:var(--ac);color:#171512;border:none;border-radius:8px;padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit" style-hover="filter:brightness(1.08)">Simpan Retur</button>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isReturnDetail }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Detail Retur">
+  <div onClick="{{ backToReturns }}" style="color:#8f887b;font-size:12.5px;cursor:pointer;margin:0 0 10px" style-hover="color:#edeae3">← Retur</div>
+  <div style="margin:0 0 20px">
+    <h1 style="font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:600;margin:0;letter-spacing:-.01em">{{ rdCode }}</h1>
+    <div style="color:#8f887b;font-size:12.5px;margin-top:4px">{{ rdSub }}</div>
+  </div>
+  <div style="background:#1b1a17;border:1px solid #2a2721;border-radius:12px;overflow:hidden;max-width:560px">
+    <div style="display:grid;grid-template-columns:1fr 90px;gap:12px;padding:11px 16px;border-bottom:1px solid #2a2721;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#8f887b;font-weight:600">
+      <div>Kode SKU</div><div style="text-align:right">Qty</div>
+    </div>
+    <sc-for list="{{ rdRows }}" as="ln" hint-placeholder-count="1">
+      <div style="display:grid;grid-template-columns:1fr 90px;gap:12px;padding:var(--rp) 16px;border-top:1px solid rgba(255,255,255,.045);align-items:center">
+        <div style="font-family:'Space Grotesk',sans-serif;font-weight:500">{{ ln.code }}</div>
+        <div style="text-align:right;font-family:'Space Grotesk',sans-serif;font-weight:600">{{ ln.qty }}</div>
+      </div>
+    </sc-for>
+  </div>
+</div>
+</sc-if>
+
+</div>
+</main>
+</div>
+
+<sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;bottom:26px;left:50%;transform:translateX(-50%);background:#221f1a;border:1px solid var(--ac);color:#edeae3;padding:10px 18px;border-radius:10px;font-size:13px;box-shadow:0 8px 30px rgba(0,0,0,.5);animation:vbToast .18s ease;z-index:50">{{ toast }}</div>
+</sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;accentColor&quot;: { &quot;editor&quot;: &quot;color&quot;, &quot;default&quot;: &quot;#e3c46e&quot;, &quot;options&quot;: [&quot;#e3c46e&quot;, &quot;#d7ff61&quot;, &quot;#ef9c82&quot;, &quot;#9fc0e8&quot;], &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Tema&quot; },
+  &quot;density&quot;: { &quot;editor&quot;: &quot;enum&quot;, &quot;default&quot;: &quot;compact&quot;, &quot;options&quot;: [&quot;compact&quot;, &quot;relaxed&quot;], &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Tema&quot; }
+}">
+class Component extends DCLogic {
+  SM = {
+    trial: { label: 'Trial', c: '#9fc0e8', bg: 'rgba(159,192,232,.13)' },
+    mass_production: { label: 'Mass Prod', c: '#e3c46e', bg: 'rgba(227,196,110,.13)' },
+    qc: { label: 'QC', c: '#eda06a', bg: 'rgba(237,160,106,.13)' },
+    completed: { label: 'Selesai', c: '#93d6a1', bg: 'rgba(147,214,161,.13)' },
+    canceled: { label: 'Batal', c: '#ff9b9b', bg: 'rgba(255,155,155,.13)' }
+  };
+  MM = {
+    production_in: { label: 'Produksi Masuk', c: '#93d6a1', bg: 'rgba(147,214,161,.13)' },
+    sale_out: { label: 'Penjualan', c: '#9fc0e8', bg: 'rgba(159,192,232,.13)' },
+    return_in: { label: 'Retur Masuk', c: '#eda06a', bg: 'rgba(237,160,106,.13)' },
+    adjustment: { label: 'Penyesuaian', c: '#cdc6b8', bg: 'rgba(205,198,184,.13)' }
+  };
+  NEXT = { trial: ['mass_production', 'canceled'], mass_production: ['qc', 'canceled'], qc: ['completed', 'mass_production', 'canceled'], completed: [], canceled: [] };
+  COSTL = { material: 'Material', cmt: 'CMT (Jahit)', overhead: 'Overhead', other: 'Lainnya' };
+  SIZES = ['S', 'M', 'L', 'XL'];
+
+  state = this.initState();
+
+  initState() {
+    const styles = [
+      { id: 1, code: 'VB-KJ01', name: 'Kirana Chore Jacket', collection: 'Tarunggana Vol. 02', colorways: [{ name: 'Batik Navy', code: 'BNV' }, { name: 'Terracotta', code: 'TRC' }], sizes: ['S', 'M', 'L', 'XL'] },
+      { id: 2, code: 'VB-SH02', name: 'Larik Camp Shirt', collection: 'Tarunggana Vol. 02', colorways: [{ name: 'Putih Tulang', code: 'PTL' }, { name: 'Hitam', code: 'HTM' }], sizes: ['S', 'M', 'L', 'XL'] },
+      { id: 3, code: 'VB-TS03', name: 'Disenchanted Tee', collection: 'Metro Essence', colorways: [{ name: 'Putih', code: 'PTH' }, { name: 'Merah Bata', code: 'MRB' }], sizes: ['M', 'L', 'XL'] },
+      { id: 4, code: 'VB-DN04', name: 'Wira Loose Denim', collection: 'Metro Essence', colorways: [{ name: 'Indigo Wash', code: 'IND' }], sizes: ['S', 'M', 'L', 'XL'] },
+      { id: 5, code: 'VB-CP05', name: 'Sena Ball Cap', collection: 'Tarunggana Vol. 02', colorways: [{ name: 'Batik Navy', code: 'BNV' }], sizes: ['OS'] }
+    ];
+    let sid = 1;
+    const skus = [];
+    styles.forEach(st => st.colorways.forEach(cw => st.sizes.forEach(sz => skus.push({ id: sid++, styleId: st.id, code: st.code + '-' + cw.code + '-' + sz, colorway: cw.name, size: sz, active: true }))));
+    const balances = {};
+    skus.forEach((s, i) => { balances[s.code] = ((i * 7) % 34) + 4; });
+    balances['VB-TS03-PTH-L'] = -4;
+    balances['VB-TS03-MRB-M'] = -2;
+    balances['VB-CP05-BNV-OS'] = 96;
+    const hppBase = { 1: 238000, 2: 146500, 4: 212400 };
+    const hppUnits = { 1: 68, 2: 110, 4: 99 };
+    const hpp = {};
+    skus.forEach(s => { hpp[s.code] = hppBase[s.styleId] ? { hpp: hppBase[s.styleId], units: hppUnits[s.styleId] } : { hpp: null, units: 0 }; });
+    const idOf = c => skus.find(x => x.code === c).id;
+    const vendors = [
+      { id: 1, name: 'CV Kencana Garmen — Bandung', contact: 'Pak Dedi · 0812-2044-7810', active: true },
+      { id: 2, name: 'Konveksi Sinar Jaya — Solo', contact: 'Bu Retno · 0857-2911-3345', active: true },
+      { id: 3, name: 'PT Busana Prima Abadi — Jakarta', contact: 'Sdr. Hakim · 0811-905-2210', active: true }
+    ];
+    const channels = [
+      { id: 1, name: 'Shopee', active: true },
+      { id: 2, name: 'Tokopedia', active: true },
+      { id: 3, name: 'TikTok Shop', active: true },
+      { id: 4, name: 'Website — vobia.id', active: true },
+      { id: 5, name: 'Lazada', active: false }
+    ];
+    const prods = [
+      { id: 16, code: 'PO-2607-016', styleId: 3, vendorId: 3, stage: 'trial', deadline: '2026-08-05', notes: 'Sample bordir dada kiri, cek hasil DTF vs bordir', lines: [
+        { skuId: idOf('VB-TS03-PTH-M'), ordered: 12, received: 0, reject: 0, dr: '0', dj: '0' },
+        { skuId: idOf('VB-TS03-MRB-M'), ordered: 12, received: 0, reject: 0, dr: '0', dj: '0' }
+      ], costs: [] },
+      { id: 15, code: 'PO-2606-015', styleId: 2, vendorId: 2, stage: 'mass_production', deadline: '2026-07-25', notes: '', lines: [
+        { skuId: idOf('VB-SH02-PTL-M'), ordered: 35, received: 0, reject: 0, dr: '0', dj: '0' },
+        { skuId: idOf('VB-SH02-PTL-L'), ordered: 35, received: 0, reject: 0, dr: '0', dj: '0' },
+        { skuId: idOf('VB-SH02-HTM-M'), ordered: 25, received: 0, reject: 0, dr: '0', dj: '0' },
+        { skuId: idOf('VB-SH02-HTM-L'), ordered: 25, received: 0, reject: 0, dr: '0', dj: '0' }
+      ], costs: [{ type: 'material', amount: 7300000, note: 'Kain oxford + kancing kerang' }] },
+      { id: 14, code: 'PO-2606-014', styleId: 1, vendorId: 1, stage: 'qc', deadline: '2026-07-18', notes: 'Kain batik cap dari Solo — cek shading antar roll', lines: [
+        { skuId: idOf('VB-KJ01-BNV-M'), ordered: 40, received: 40, reject: 2, dr: '40', dj: '2' },
+        { skuId: idOf('VB-KJ01-BNV-L'), ordered: 40, received: 25, reject: 1, dr: '25', dj: '1' },
+        { skuId: idOf('VB-KJ01-TRC-M'), ordered: 30, received: 0, reject: 0, dr: '0', dj: '0' },
+        { skuId: idOf('VB-KJ01-TRC-L'), ordered: 30, received: 0, reject: 0, dr: '0', dj: '0' }
+      ], costs: [
+        { type: 'material', amount: 14250000, note: 'Batik cap + corduroy kerah' },
+        { type: 'cmt', amount: 6800000, note: 'CMT Kencana' }
+      ] },
+      { id: 11, code: 'PO-2605-011', styleId: 4, vendorId: 1, stage: 'completed', deadline: '2026-06-10', notes: 'Repeat order denim 14oz', lines: [
+        { skuId: idOf('VB-DN04-IND-S'), ordered: 20, received: 20, reject: 0, dr: '20', dj: '0' },
+        { skuId: idOf('VB-DN04-IND-M'), ordered: 40, received: 40, reject: 1, dr: '40', dj: '1' },
+        { skuId: idOf('VB-DN04-IND-L'), ordered: 40, received: 39, reject: 2, dr: '39', dj: '2' },
+        { skuId: idOf('VB-DN04-IND-XL'), ordered: 20, received: 20, reject: 0, dr: '20', dj: '0' }
+      ], costs: [
+        { type: 'material', amount: 9800000, note: 'Denim 14oz + hardware' },
+        { type: 'cmt', amount: 5400000, note: 'CMT Kencana' },
+        { type: 'overhead', amount: 1150000, note: 'QC + packing' }
+      ] }
+    ];
+    const orders = [
+      { id: 42, code: 'SO-2607-042', channelId: 3, date: '2026-07-03', customer: 'Rizky Ananda', notes: '', lines: [
+        { skuId: idOf('VB-TS03-PTH-M'), qty: 2, price: 189000 }, { skuId: idOf('VB-CP05-BNV-OS'), qty: 1, price: 159000 }
+      ] },
+      { id: 41, code: 'SO-2607-041', channelId: 1, date: '2026-07-02', customer: 'Nadia Puspita', notes: '', lines: [
+        { skuId: idOf('VB-TS03-PTH-L'), qty: 3, price: 189000 }
+      ] },
+      { id: 40, code: 'SO-2607-040', channelId: 4, date: '2026-07-01', customer: 'Bram Santoso', notes: 'Gift wrap', lines: [
+        { skuId: idOf('VB-KJ01-BNV-M'), qty: 1, price: 749000 }
+      ] },
+      { id: 39, code: 'SO-2606-039', channelId: 2, date: '2026-06-28', customer: 'Kevin Hartono', notes: '', lines: [
+        { skuId: idOf('VB-SH02-PTL-L'), qty: 2, price: 429000 }
+      ] },
+      { id: 38, code: 'SO-2606-038', channelId: 1, date: '2026-06-27', customer: 'Alya Rahma', notes: '', lines: [
+        { skuId: idOf('VB-DN04-IND-M'), qty: 1, price: 559000 }, { skuId: idOf('VB-TS03-MRB-L'), qty: 1, price: 189000 }
+      ] },
+      { id: 37, code: 'SO-2606-037', channelId: 4, date: '2026-06-25', customer: 'Dimas Wicaksono', notes: '', lines: [
+        { skuId: idOf('VB-SH02-HTM-M'), qty: 1, price: 429000 }
+      ] }
+    ];
+    const returns = [
+      { id: 4, code: 'RT-2607-004', orderId: 41, date: '2026-07-04', reason: 'Cacat jahitan', notes: '', lines: [{ skuId: idOf('VB-TS03-PTH-L'), qty: 1 }] },
+      { id: 3, code: 'RT-2606-003', orderId: 39, date: '2026-06-30', reason: 'Ukuran tidak sesuai', notes: 'Tukar ke size M', lines: [{ skuId: idOf('VB-SH02-PTL-L'), qty: 1 }] }
+    ];
+    const movements = [
+      { skuCode: 'VB-TS03-PTH-L', type: 'return_in', qty: 1, reason: 'RT-2607-004' },
+      { skuCode: 'VB-TS03-PTH-L', type: 'sale_out', qty: -3, reason: 'SO-2607-041' },
+      { skuCode: 'VB-TS03-PTH-M', type: 'sale_out', qty: -2, reason: 'SO-2607-042' },
+      { skuCode: 'VB-KJ01-BNV-M', type: 'production_in', qty: 40, reason: 'PO-2606-014 · QC pass' },
+      { skuCode: 'VB-DN04-IND-L', type: 'adjustment', qty: -2, reason: 'Stock opname gudang Juli' },
+      { skuCode: 'VB-SH02-PTL-L', type: 'return_in', qty: 1, reason: 'RT-2606-003' },
+      { skuCode: 'VB-DN04-IND-M', type: 'production_in', qty: 40, reason: 'PO-2605-011 · selesai' }
+    ];
+    return {
+      route: { page: 'dashboard', view: 'list', id: null },
+      styles, skus, balances, hpp, vendors, channels, prods, orders, returns, movements,
+      toast: null,
+      forms: {
+        style: { code: '', name: '', collection: '', colorways: [{ name: '', code: '' }], sizes: ['M', 'L'], overrides: {} },
+        adj: { skuId: '', qty: '', reason: '' },
+        prod: { styleId: '', vendorId: '', deadline: '2026-07-31', notes: '', lines: [{ skuId: '', qty: '' }] },
+        vendor: { name: '', contact: '' },
+        order: { channelId: '', date: '2026-07-04', customer: '', notes: '', lines: [{ skuId: '', qty: '1', price: '' }] },
+        channel: { name: '' },
+        ret: { orderId: '', date: '2026-07-04', reason: '', notes: '', lines: [{ skuId: '', qty: '1' }] },
+        cost: { type: 'material', amount: '', note: '' }
+      }
+    };
+  }
+
+  componentDidMount() { this.applyTheme(); }
+  componentDidUpdate() { this.applyTheme(); }
+  applyTheme() {
+    const b = document.body;
+    b.style.setProperty('--ac', this.props.accentColor ?? '#e3c46e');
+    b.style.setProperty('--rp', (this.props.density ?? 'compact') === 'compact' ? '8px' : '13px');
+  }
+
+  fmt(n) { return 'Rp ' + Math.round(n).toLocaleString('id-ID'); }
+  fmtD(iso) { if (!iso) return '—'; const d = new Date(iso + 'T00:00:00'); return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }); }
+  flash(msg) { clearTimeout(this._tt); this.setState({ toast: msg }); this._tt = setTimeout(() => this.setState({ toast: null }), 2600); }
+
+  go(page) { this.setState({ route: { page, view: 'list', id: null } }); }
+  open(page, id) { this.setState({ route: { page, view: 'detail', id } }); }
+  createView(page) { this.setState({ route: { page, view: 'create', id: null } }); }
+
+  setF(form, key, val) { this.setState(s => ({ forms: { ...s.forms, [form]: { ...s.forms[form], [key]: val } } })); }
+  inp(form, key) { return e => this.setF(form, key, e.target.value); }
+  setLine(form, i, key) { return e => { const v = e.target.value; this.setState(s => { const f = { ...s.forms[form] }; f.lines = f.lines.map((ln, j) => j === i ? { ...ln, [key]: v } : ln); return { forms: { ...s.forms, [form]: f } }; }); }; }
+  addLine(form, tmpl) { this.setState(s => { const f = { ...s.forms[form] }; f.lines = [...f.lines, tmpl]; return { forms: { ...s.forms, [form]: f } }; }); }
+  rmLine(form, i) { this.setState(s => { const f = { ...s.forms[form] }; f.lines = f.lines.filter((_, j) => j !== i); return { forms: { ...s.forms, [form]: f } }; }); }
+
+  applyMoves(moves) {
+    this.setState(s => {
+      const b = { ...s.balances };
+      moves.forEach(m => { b[m.skuCode] = (b[m.skuCode] || 0) + m.qty; });
+      return { balances: b, movements: [...moves, ...s.movements].slice(0, 15) };
+    });
+  }
+  orderTotalOf(o) { return o.lines.reduce((t, l) => t + l.qty * l.price, 0); }
+
+  setCw(i, key, val) { this.setState(s => { const f = { ...s.forms.style }; f.colorways = f.colorways.map((c, j) => j === i ? { ...c, [key]: val } : c); return { forms: { ...s.forms, style: f } }; }); }
+  addCw() { this.setState(s => ({ forms: { ...s.forms, style: { ...s.forms.style, colorways: [...s.forms.style.colorways, { name: '', code: '' }] } } })); }
+  rmCw(i) { this.setState(s => ({ forms: { ...s.forms, style: { ...s.forms.style, colorways: s.forms.style.colorways.filter((_, j) => j !== i) } } })); }
+  toggleSize(sz) { this.setState(s => { const f = s.forms.style; const sizes = f.sizes.includes(sz) ? f.sizes.filter(x => x !== sz) : [...f.sizes, sz]; return { forms: { ...s.forms, style: { ...f, sizes } } }; }); }
+  setOverride(key, val) { this.setState(s => ({ forms: { ...s.forms, style: { ...s.forms.style, overrides: { ...s.forms.style.overrides, [key]: val } } } })); }
+  toggleSku(id) { this.setState(s => ({ skus: s.skus.map(k => k.id === id ? { ...k, active: !k.active } : k) })); }
+
+  submitStyle() {
+    const sf = this.state.forms.style;
+    if (!sf.code.trim() || !sf.name.trim()) { this.flash('Lengkapi kode & nama style'); return; }
+    const validCws = sf.colorways.filter(c => c.name.trim() && c.code.trim());
+    if (!validCws.length) { this.flash('Tambahkan minimal satu colorway (nama + kode)'); return; }
+    if (!sf.sizes.length) { this.flash('Pilih minimal satu size'); return; }
+    const id = Math.max(...this.state.styles.map(x => x.id)) + 1;
+    let sid = Math.max(...this.state.skus.map(x => x.id)) + 1;
+    const code = sf.code.trim().toUpperCase();
+    const newSkus = [];
+    sf.colorways.forEach((cw, ci) => {
+      if (!(cw.name.trim() && cw.code.trim())) return;
+      this.SIZES.filter(z => sf.sizes.includes(z)).forEach(sz => {
+        const key = ci + '-' + sz;
+        const def = code + '-' + cw.code.trim().toUpperCase() + '-' + sz;
+        newSkus.push({ id: sid++, styleId: id, code: (sf.overrides[key] || def).toUpperCase(), colorway: cw.name.trim(), size: sz, active: true });
+      });
+    });
+    this.setState(s => {
+      const balances = { ...s.balances }; const hpp = { ...s.hpp };
+      newSkus.forEach(k => { balances[k.code] = 0; hpp[k.code] = { hpp: null, units: 0 }; });
+      return {
+        styles: [...s.styles, { id, code, name: sf.name.trim(), collection: sf.collection.trim() || '—', colorways: validCws, sizes: [...sf.sizes] }],
+        skus: [...s.skus, ...newSkus], balances, hpp,
+        forms: { ...s.forms, style: { code: '', name: '', collection: '', colorways: [{ name: '', code: '' }], sizes: ['M', 'L'], overrides: {} } },
+        route: { page: 'styles', view: 'detail', id }
+      };
+    });
+    this.flash('Style ' + code + ' dibuat · ' + newSkus.length + ' SKU di-generate');
+  }
+
+  submitAdj() {
+    const f = this.state.forms.adj; const qty = parseInt(f.qty, 10);
+    if (!f.skuId || !qty) { this.flash('Pilih SKU & isi qty (boleh negatif)'); return; }
+    const sku = this.state.skus.find(x => String(x.id) === f.skuId);
+    this.applyMoves([{ skuCode: sku.code, type: 'adjustment', qty, reason: f.reason.trim() || 'Penyesuaian manual' }]);
+    this.setState(s => ({ forms: { ...s.forms, adj: { ...s.forms.adj, qty: '', reason: '' } } }));
+    this.flash('Penyesuaian ' + (qty > 0 ? '+' : '') + qty + ' untuk ' + sku.code);
+  }
+
+  submitProd() {
+    const f = this.state.forms.prod;
+    if (!f.styleId || !f.vendorId) { this.flash('Pilih style & vendor dulu'); return; }
+    const lines = f.lines.filter(l => l.skuId && parseInt(l.qty, 10) > 0).map(l => ({ skuId: Number(l.skuId), ordered: parseInt(l.qty, 10), received: 0, reject: 0, dr: '0', dj: '0' }));
+    if (!lines.length) { this.flash('Tambahkan minimal satu line (SKU + qty)'); return; }
+    const id = Math.max(...this.state.prods.map(x => x.id)) + 1;
+    const code = 'PO-2607-0' + id;
+    this.setState(s => ({
+      prods: [{ id, code, styleId: Number(f.styleId), vendorId: Number(f.vendorId), stage: 'trial', deadline: f.deadline, notes: f.notes.trim(), lines, costs: [] }, ...s.prods],
+      forms: { ...s.forms, prod: { styleId: '', vendorId: '', deadline: '2026-07-31', notes: '', lines: [{ skuId: '', qty: '' }] } },
+      route: { page: 'production', view: 'detail', id }
+    }));
+    this.flash('Order produksi ' + code + ' dibuat (stage Trial)');
+  }
+
+  setStage(pid, st) {
+    this.setState(s => ({ prods: s.prods.map(p => p.id === pid ? { ...p, stage: st } : p) }));
+    this.flash('Stage diubah ke ' + this.SM[st].label);
+  }
+
+  setPL(pid, i, key) { return e => { const v = e.target.value; this.setState(s => ({ prods: s.prods.map(p => p.id !== pid ? p : { ...p, lines: p.lines.map((ln, j) => j === i ? { ...ln, [key]: v } : ln) }) })); }; }
+
+  saveProdLine(pid, i) {
+    const p = this.state.prods.find(x => x.id === pid);
+    const ln = p.lines[i];
+    const nr = parseInt(ln.dr, 10) || 0;
+    const nj = parseInt(ln.dj, 10) || 0;
+    const delta = nr - ln.received;
+    this.setState(s => ({ prods: s.prods.map(pp => pp.id !== pid ? pp : { ...pp, lines: pp.lines.map((l, j) => j === i ? { ...l, received: nr, reject: nj, dr: String(nr), dj: String(nj) } : l) }) }));
+    if (delta !== 0) {
+      const sku = this.state.skus.find(x => x.id === ln.skuId);
+      this.applyMoves([{ skuCode: sku.code, type: 'production_in', qty: delta, reason: p.code + ' · penerimaan' }]);
+    }
+    this.flash('Line produksi disimpan' + (delta > 0 ? ' · stok +' + delta : ''));
+  }
+
+  addCost() {
+    const f = this.state.forms.cost; const amt = parseInt(f.amount, 10);
+    if (!amt) { this.flash('Isi jumlah biaya'); return; }
+    const pid = this.state.route.id;
+    this.setState(s => ({
+      prods: s.prods.map(p => p.id !== pid ? p : { ...p, costs: [...p.costs, { type: f.type, amount: amt, note: f.note.trim() }] }),
+      forms: { ...s.forms, cost: { ...s.forms.cost, amount: '', note: '' } }
+    }));
+    this.flash('Biaya ditambahkan');
+  }
+
+  submitVendor() {
+    const f = this.state.forms.vendor;
+    if (!f.name.trim()) { this.flash('Isi nama vendor'); return; }
+    const id = Math.max(...this.state.vendors.map(x => x.id)) + 1;
+    this.setState(s => ({ vendors: [...s.vendors, { id, name: f.name.trim(), contact: f.contact.trim() || '—', active: true }], forms: { ...s.forms, vendor: { name: '', contact: '' } } }));
+    this.flash('Vendor disimpan');
+  }
+
+  submitChannel() {
+    const f = this.state.forms.channel;
+    if (!f.name.trim()) { this.flash('Isi nama channel'); return; }
+    const id = Math.max(...this.state.channels.map(x => x.id)) + 1;
+    this.setState(s => ({ channels: [...s.channels, { id, name: f.name.trim(), active: true }], forms: { ...s.forms, channel: { name: '' } } }));
+    this.flash('Channel disimpan');
+  }
+
+  submitOrder() {
+    const f = this.state.forms.order;
+    if (!f.channelId) { this.flash('Pilih channel dulu'); return; }
+    const lines = f.lines.filter(l => l.skuId && parseInt(l.qty, 10) > 0 && parseInt(l.price, 10) > 0).map(l => ({ skuId: Number(l.skuId), qty: parseInt(l.qty, 10), price: parseInt(l.price, 10) }));
+    if (!lines.length) { this.flash('Lengkapi line order (SKU, qty, harga)'); return; }
+    const id = Math.max(...this.state.orders.map(x => x.id)) + 1;
+    const code = 'SO-2607-0' + id;
+    const moves = lines.map(l => { const sku = this.state.skus.find(x => x.id === l.skuId); return { skuCode: sku.code, type: 'sale_out', qty: -l.qty, reason: code }; });
+    this.setState(s => ({
+      orders: [{ id, code, channelId: Number(f.channelId), date: f.date, customer: f.customer.trim() || '—', notes: f.notes.trim(), lines }, ...s.orders],
+      forms: { ...s.forms, order: { channelId: '', date: '2026-07-04', customer: '', notes: '', lines: [{ skuId: '', qty: '1', price: '' }] } },
+      route: { page: 'orders', view: 'detail', id }
+    }));
+    this.applyMoves(moves);
+    this.flash('Order ' + code + ' disimpan · stok berkurang');
+  }
+
+  submitReturn() {
+    const f = this.state.forms.ret;
+    if (!f.orderId) { this.flash('Pilih order dulu'); return; }
+    const lines = f.lines.filter(l => l.skuId && parseInt(l.qty, 10) > 0).map(l => ({ skuId: Number(l.skuId), qty: parseInt(l.qty, 10) }));
+    if (!lines.length) { this.flash('Tambahkan minimal satu line retur'); return; }
+    const id = Math.max(...this.state.returns.map(x => x.id)) + 1;
+    const code = 'RT-2607-00' + id;
+    const moves = lines.map(l => { const sku = this.state.skus.find(x => x.id === l.skuId); return { skuCode: sku.code, type: 'return_in', qty: l.qty, reason: code }; });
+    this.setState(s => ({
+      returns: [{ id, code, orderId: Number(f.orderId), date: f.date, reason: f.reason.trim() || '—', notes: f.notes.trim(), lines }, ...s.returns],
+      forms: { ...s.forms, ret: { orderId: '', date: '2026-07-04', reason: '', notes: '', lines: [{ skuId: '', qty: '1' }] } },
+      route: { page: 'returns', view: 'detail', id }
+    }));
+    this.applyMoves(moves);
+    this.flash('Retur ' + code + ' disimpan · stok bertambah');
+  }
+
+  renderVals() {
+    const s = this.state, r = s.route, F = s.forms;
+    const skuById = id => s.skus.find(x => x.id === id) || { code: '?' };
+    const styleById = id => s.styles.find(x => x.id === id) || {};
+    const vendorById = id => s.vendors.find(x => x.id === id) || {};
+    const chById = id => s.channels.find(x => x.id === id) || {};
+    const orderById = id => s.orders.find(x => x.id === id) || {};
+    const pg = (p, v) => r.page === p && r.view === v;
+
+    const groups = [
+      { title: 'Overview', items: [['dashboard', 'Dashboard']] },
+      { title: 'Katalog', items: [['styles', 'Styles'], ['stock', 'Stok'], ['costing', 'HPP / Costing']] },
+      { title: 'Produksi', items: [['production', 'Produksi'], ['vendors', 'Vendor']] },
+      { title: 'Penjualan', items: [['orders', 'Order'], ['channels', 'Channel'], ['returns', 'Retur']] }
+    ];
+    const navGroups = groups.map(g => ({
+      title: g.title,
+      items: g.items.map(([k, label]) => {
+        const act = r.page === k;
+        return { label, fw: act ? 600 : 500, color: act ? 'var(--acink)' : '#b8b1a3', bg: act ? 'var(--ac)' : 'transparent', go: () => this.go(k) };
+      })
+    }));
+
+    const openProds = s.prods.filter(p => p.stage !== 'completed' && p.stage !== 'canceled');
+    const stockTotal = Object.values(s.balances).reduce((a, b) => a + b, 0);
+    const sortedOrders = [...s.orders].sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id);
+    const collections = new Set(s.styles.map(x => x.collection)).size;
+    const activeSkus = s.skus.filter(k => k.active).length;
+    const now = new Date();
+    const dashSub = 'Ringkasan operasional · ' + now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+    const metrics = [
+      { label: 'Styles', value: String(s.styles.length), sub: collections + ' koleksi', go: () => this.go('styles') },
+      { label: 'SKU', value: String(s.skus.length), sub: activeSkus + ' aktif', go: () => this.go('styles') },
+      { label: 'Stok', value: stockTotal.toLocaleString('id-ID'), sub: 'unit di gudang', go: () => this.go('stock') },
+      { label: 'Produksi Aktif', value: String(openProds.length), sub: 'order berjalan', go: () => this.go('production') },
+      { label: 'Order', value: String(s.orders.length), sub: 'semua channel', go: () => this.go('orders') }
+    ];
+    const oversold = Object.entries(s.balances).filter(([, v]) => v < 0).map(([code, v]) => ({ code, bal: String(v) }));
+    const recentOrders = sortedOrders.slice(0, 5).map(o => ({ code: o.code, channel: chById(o.channelId).name || '—', date: this.fmtD(o.date), total: this.fmt(this.orderTotalOf(o)), open: () => this.open('orders', o.id) }));
+
+    const styleRows = s.styles.map(st => ({
+      code: st.code, name: st.name, collection: st.collection,
+      cw: String(st.colorways.length), skuCount: String(s.skus.filter(k => k.styleId === st.id).length),
+      open: () => this.open('styles', st.id)
+    }));
+
+    const sf = F.style;
+    const cwRows = sf.colorways.map((cw, i) => ({
+      name: cw.name, code: cw.code,
+      onName: e => this.setCw(i, 'name', e.target.value),
+      onCode: e => this.setCw(i, 'code', e.target.value.toUpperCase()),
+      onRemove: () => this.rmCw(i)
+    }));
+    const sizeChips = this.SIZES.map(sz => {
+      const a = sf.sizes.includes(sz);
+      return { label: sz, bg: a ? 'var(--ac)' : 'transparent', color: a ? 'var(--acink)' : '#b8b1a3', border: a ? 'var(--ac)' : '#2e2b25', onToggle: () => this.toggleSize(sz) };
+    });
+    const validCwIdx = sf.colorways.map((cw, i) => ({ cw, i })).filter(x => x.cw.code.trim());
+    const hasSkuPrev = Boolean(sf.code.trim() && validCwIdx.length && sf.sizes.length);
+    const skuPrev = hasSkuPrev ? validCwIdx.flatMap(({ cw, i }) =>
+      this.SIZES.filter(z => sf.sizes.includes(z)).map(sz => {
+        const key = i + '-' + sz;
+        const def = sf.code.trim().toUpperCase() + '-' + cw.code.trim().toUpperCase() + '-' + sz;
+        return { cw: cw.name || 'Colorway ' + (i + 1), size: sz, value: sf.overrides[key] ?? def, onChange: e => this.setOverride(key, e.target.value) };
+      })) : [];
+
+    const stDet = pg('styles', 'detail') ? s.styles.find(x => x.id === r.id) : null;
+    const sdSkus = stDet ? s.skus.filter(k => k.styleId === stDet.id) : [];
+    const sdSkuRows = sdSkus.map(k => ({
+      code: k.code, cw: k.colorway, size: k.size,
+      tBg: k.active ? 'var(--ac)' : '#2e2b25',
+      knob: k.active ? 'translateX(14px)' : 'translateX(0px)',
+      knobBg: k.active ? '#171512' : '#8f887b',
+      statusLabel: k.active ? 'Aktif' : 'Nonaktif',
+      statusColor: k.active ? '#93d6a1' : '#8f887b',
+      onToggle: () => this.toggleSku(k.id)
+    }));
+
+    const stockRows = s.skus.map(k => {
+      const b = s.balances[k.code] ?? 0;
+      return { code: k.code, bal: b.toLocaleString('id-ID'), balColor: b < 0 ? '#ff9b9b' : '#edeae3' };
+    });
+    const skuOptions = s.skus.filter(k => k.active).map(k => ({ id: String(k.id), label: k.code }));
+    const movRows = s.movements.map(m => {
+      const mm = this.MM[m.type];
+      return { code: m.skuCode, label: mm.label, chipBg: mm.bg, chipColor: mm.c, qty: (m.qty > 0 ? '+' : '') + m.qty, qtyColor: m.qty < 0 ? '#ff9b9b' : '#93d6a1', reason: m.reason || '—' };
+    });
+
+    const prodRows = s.prods.map(p => {
+      const sm = this.SM[p.stage];
+      return { code: p.code, style: styleById(p.styleId).code || '—', vendor: (vendorById(p.vendorId).name || '—').split(' — ')[0], stageLabel: sm.label, stBg: sm.bg, stColor: sm.c, deadline: this.fmtD(p.deadline), open: () => this.open('production', p.id) };
+    });
+    const styleOptions = s.styles.map(x => ({ id: String(x.id), label: x.code + ' — ' + x.name }));
+    const vendorOptions = s.vendors.filter(v => v.active).map(v => ({ id: String(v.id), label: v.name }));
+    const pf = F.prod;
+    const plRows = pf.lines.map((ln, i) => ({ skuId: ln.skuId, qty: ln.qty, onSku: this.setLine('prod', i, 'skuId'), onQty: this.setLine('prod', i, 'qty'), onRemove: () => this.rmLine('prod', i) }));
+
+    const p = pg('production', 'detail') ? s.prods.find(x => x.id === r.id) : null;
+    const linear = ['trial', 'mass_production', 'qc', 'completed'];
+    const curIdx = p ? linear.indexOf(p.stage) : -1;
+    const stageSteps = p ? linear.map((st, i) => {
+      const done = curIdx >= 0 && i < curIdx, active = i === curIdx;
+      return {
+        label: this.SM[st].label, fw: active ? 600 : 500,
+        dotBg: done || active ? 'var(--ac)' : 'transparent',
+        dotBorder: done || active ? 'var(--ac)' : '#3a362e',
+        color: active ? '#edeae3' : done ? '#b8b1a3' : '#6e685e',
+        lineBg: i === 0 ? 'transparent' : (curIdx >= 0 && i <= curIdx ? 'var(--ac)' : '#3a362e'),
+        lineW: i === 0 ? '0px' : '30px'
+      };
+    }) : [];
+    const nextBtns = p ? (this.NEXT[p.stage] || []).map(st => {
+      const danger = st === 'canceled';
+      const back = st === 'mass_production' && p.stage === 'qc';
+      return {
+        label: danger ? 'Batalkan Order' : back ? '← Kembali ke Mass Prod' : 'Lanjut ke ' + this.SM[st].label,
+        bg: danger || back ? 'transparent' : 'var(--ac)',
+        color: danger ? '#ff9b9b' : back ? '#c9c2b4' : 'var(--acink)',
+        border: danger ? '#5a3434' : back ? '#2e2b25' : 'var(--ac)',
+        onClick: () => this.setStage(p.id, st)
+      };
+    }) : [];
+    const pdLines = p ? p.lines.map((ln, i) => ({
+      code: skuById(ln.skuId).code, ordered: String(ln.ordered), received: ln.dr, reject: ln.dj,
+      onReceived: this.setPL(p.id, i, 'dr'), onReject: this.setPL(p.id, i, 'dj'), onSave: () => this.saveProdLine(p.id, i)
+    })) : [];
+    const costRows = p ? p.costs.map(c => ({ type: this.COSTL[c.type], note: c.note || '—', amount: this.fmt(c.amount) })) : [];
+    const costSum = p ? p.costs.reduce((t, c) => t + c.amount, 0) : 0;
+
+    const vendorRows = s.vendors.map(v => ({
+      name: v.name, contact: v.contact,
+      stLabel: v.active ? 'Aktif' : 'Nonaktif',
+      stColor: v.active ? '#93d6a1' : '#8f887b',
+      stBg: v.active ? 'rgba(147,214,161,.12)' : 'rgba(255,255,255,.06)'
+    }));
+
+    const hppRows = s.skus.map(k => {
+      const h = s.hpp[k.code] || { hpp: null, units: 0 };
+      return { code: k.code, hpp: h.hpp == null ? '—' : this.fmt(h.hpp), hppColor: h.hpp == null ? '#6e685e' : '#edeae3', units: String(h.units) };
+    });
+
+    const orderRows = sortedOrders.map(o => ({ code: o.code, channel: chById(o.channelId).name || '—', date: this.fmtD(o.date), total: this.fmt(this.orderTotalOf(o)), open: () => this.open('orders', o.id) }));
+    const channelOptions = s.channels.filter(c => c.active).map(c => ({ id: String(c.id), label: c.name }));
+    const of = F.order;
+    let orderSum = 0;
+    const olRows = of.lines.map((ln, i) => {
+      const q = parseInt(ln.qty, 10) || 0, pr = parseInt(ln.price, 10) || 0;
+      orderSum += q * pr;
+      return { skuId: ln.skuId, qty: ln.qty, price: ln.price, subtotal: q && pr ? this.fmt(q * pr) : '—', onSku: this.setLine('order', i, 'skuId'), onQty: this.setLine('order', i, 'qty'), onPrice: this.setLine('order', i, 'price'), onRemove: () => this.rmLine('order', i) };
+    });
+
+    const o = pg('orders', 'detail') ? s.orders.find(x => x.id === r.id) : null;
+    const odRows = o ? o.lines.map(ln => ({ code: skuById(ln.skuId).code, qty: String(ln.qty), price: this.fmt(ln.price), subtotal: this.fmt(ln.qty * ln.price) })) : [];
+
+    const channelRows = s.channels.map(c => ({
+      name: c.name,
+      stLabel: c.active ? 'Aktif' : 'Nonaktif',
+      stColor: c.active ? '#93d6a1' : '#8f887b',
+      stBg: c.active ? 'rgba(147,214,161,.12)' : 'rgba(255,255,255,.06)'
+    }));
+
+    const returnRows = s.returns.map(rt => ({ code: rt.code, orderCode: orderById(rt.orderId).code || '—', date: this.fmtD(rt.date), reason: rt.reason, open: () => this.open('returns', rt.id) }));
+    const orderOptions = sortedOrders.map(x => ({ id: String(x.id), label: x.code + ' — ' + x.customer }));
+    const rf = F.ret;
+    const rlRows = rf.lines.map((ln, i) => ({ skuId: ln.skuId, qty: ln.qty, onSku: this.setLine('ret', i, 'skuId'), onQty: this.setLine('ret', i, 'qty'), onRemove: () => this.rmLine('ret', i) }));
+
+    const rt = pg('returns', 'detail') ? s.returns.find(x => x.id === r.id) : null;
+    const rdRows = rt ? rt.lines.map(ln => ({ code: skuById(ln.skuId).code, qty: String(ln.qty) })) : [];
+
+    return {
+      navGroups, toast: s.toast || '', hasToast: !!s.toast,
+
+      isDashboard: r.page === 'dashboard', dashSub, metrics,
+      oversold, hasOversold: oversold.length > 0, noOversold: oversold.length === 0,
+      recentOrders, goOrders: () => this.go('orders'),
+
+      isStylesList: pg('styles', 'list'),
+      stylesSub: s.styles.length + ' style · ' + s.skus.length + ' SKU · ' + collections + ' koleksi',
+      styleRows, goStyleCreate: () => this.createView('styles'),
+
+      isStyleCreate: pg('styles', 'create'),
+      sfCode: sf.code, sfName: sf.name, sfCollection: sf.collection,
+      onSfCode: this.inp('style', 'code'), onSfName: this.inp('style', 'name'), onSfCollection: this.inp('style', 'collection'),
+      cwRows, addCw: () => this.addCw(), sizeChips,
+      hasSkuPrev, noSkuPrev: !hasSkuPrev, skuPrev,
+      submitStyle: () => this.submitStyle(), cancelStyleCreate: () => this.go('styles'),
+
+      isStyleDetail: !!stDet,
+      sdName: stDet ? stDet.name : '',
+      sdSub: stDet ? stDet.code + ' · ' + stDet.collection + ' · ' + stDet.colorways.length + ' colorway · ' + sdSkus.length + ' SKU' : '',
+      sdSkuRows, backToStyles: () => this.go('styles'),
+
+      isStock: r.page === 'stock',
+      stockSub: s.skus.length + ' SKU · total ' + stockTotal.toLocaleString('id-ID') + ' unit',
+      stockRows, skuOptions,
+      adjSku: F.adj.skuId, onAdjSku: this.inp('adj', 'skuId'),
+      adjQty: F.adj.qty, onAdjQty: this.inp('adj', 'qty'),
+      adjReason: F.adj.reason, onAdjReason: this.inp('adj', 'reason'),
+      submitAdj: () => this.submitAdj(), movRows,
+
+      isProdList: pg('production', 'list'),
+      prodSub: openProds.length + ' order aktif dari ' + s.prods.length + ' total',
+      prodRows, goProdCreate: () => this.createView('production'),
+
+      isProdCreate: pg('production', 'create'),
+      styleOptions, vendorOptions,
+      pfStyle: pf.styleId, onPfStyle: this.inp('prod', 'styleId'),
+      pfVendor: pf.vendorId, onPfVendor: this.inp('prod', 'vendorId'),
+      pfDeadline: pf.deadline, onPfDeadline: this.inp('prod', 'deadline'),
+      pfNotes: pf.notes, onPfNotes: this.inp('prod', 'notes'),
+      plRows, addPl: () => this.addLine('prod', { skuId: '', qty: '' }),
+      submitProd: () => this.submitProd(), cancelProd: () => this.go('production'),
+
+      isProdDetail: !!p,
+      pdCode: p ? p.code : '',
+      pdSub: p ? (styleById(p.styleId).code || '') + ' — ' + (styleById(p.styleId).name || '') + ' · ' + (vendorById(p.vendorId).name || '') + ' · Deadline ' + this.fmtD(p.deadline) : '',
+      isPdCanceled: !!p && p.stage === 'canceled',
+      notPdCanceled: !!p && p.stage !== 'canceled',
+      stageSteps, nextBtns, hasNextBtns: nextBtns.length > 0,
+      hasPdNotes: !!p && !!p.notes, pdNotes: p ? p.notes : '',
+      pdLines, costRows, hasCosts: costRows.length > 0, noCosts: costRows.length === 0,
+      costTotal: this.fmt(costSum),
+      cfType: F.cost.type, onCfType: this.inp('cost', 'type'),
+      cfAmount: F.cost.amount, onCfAmount: this.inp('cost', 'amount'),
+      cfNote: F.cost.note, onCfNote: this.inp('cost', 'note'),
+      addCost: () => this.addCost(), backToProd: () => this.go('production'),
+
+      isVendors: r.page === 'vendors',
+      vendorsSub: s.vendors.filter(v => v.active).length + ' vendor aktif',
+      vendorRows,
+      vfName: F.vendor.name, onVfName: this.inp('vendor', 'name'),
+      vfContact: F.vendor.contact, onVfContact: this.inp('vendor', 'contact'),
+      submitVendor: () => this.submitVendor(),
+
+      isCosting: r.page === 'costing',
+      costingSub: 'HPP per SKU dari biaya produksi · SKU tanpa produksi selesai tampil “—”',
+      hppRows,
+
+      isOrdersList: pg('orders', 'list'),
+      ordersSub: s.orders.length + ' order · ' + s.channels.filter(c => c.active).length + ' channel aktif',
+      orderRows, goOrderCreate: () => this.createView('orders'),
+
+      isOrderCreate: pg('orders', 'create'),
+      channelOptions,
+      ofChannel: of.channelId, onOfChannel: this.inp('order', 'channelId'),
+      ofDate: of.date, onOfDate: this.inp('order', 'date'),
+      ofCustomer: of.customer, onOfCustomer: this.inp('order', 'customer'),
+      ofNotes: of.notes, onOfNotes: this.inp('order', 'notes'),
+      olRows, addOl: () => this.addLine('order', { skuId: '', qty: '1', price: '' }),
+      orderTotal: this.fmt(orderSum),
+      submitOrder: () => this.submitOrder(), cancelOrder: () => this.go('orders'),
+
+      isOrderDetail: !!o,
+      odCode: o ? o.code : '',
+      odSub: o ? (chById(o.channelId).name || '—') + ' · ' + this.fmtD(o.date) + ' · ' + o.customer : '',
+      odRows, odTotal: o ? this.fmt(this.orderTotalOf(o)) : '',
+      backToOrders: () => this.go('orders'),
+
+      isChannels: r.page === 'channels',
+      channelsSub: s.channels.filter(c => c.active).length + ' channel aktif dari ' + s.channels.length,
+      channelRows,
+      chName: F.channel.name, onChName: this.inp('channel', 'name'),
+      submitChannel: () => this.submitChannel(),
+
+      isReturnsList: pg('returns', 'list'),
+      returnsSub: s.returns.length + ' retur tercatat',
+      returnRows, goReturnCreate: () => this.createView('returns'),
+
+      isReturnCreate: pg('returns', 'create'),
+      orderOptions,
+      rfOrder: rf.orderId, onRfOrder: this.inp('ret', 'orderId'),
+      rfDate: rf.date, onRfDate: this.inp('ret', 'date'),
+      rfReason: rf.reason, onRfReason: this.inp('ret', 'reason'),
+      rfNotes: rf.notes, onRfNotes: this.inp('ret', 'notes'),
+      rlRows, addRl: () => this.addLine('ret', { skuId: '', qty: '1' }),
+      submitReturn: () => this.submitReturn(), cancelReturn: () => this.go('returns'),
+
+      isReturnDetail: !!rt,
+      rdCode: rt ? rt.code : '',
+      rdSub: rt ? (orderById(rt.orderId).code || '—') + ' · ' + this.fmtD(rt.date) + ' · ' + rt.reason : '',
+      rdRows, backToReturns: () => this.go('returns')
+    };
+  }
+}
+</script>
+</body>
+</html>

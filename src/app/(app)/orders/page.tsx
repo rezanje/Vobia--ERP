@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { rp } from '@/lib/ui'
 
 export default async function OrdersPage() {
   const supabase = await createClient()
@@ -14,32 +15,28 @@ export default async function OrdersPage() {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-        <h1 style={{ fontSize: 22, fontWeight: 500 }}>Orders</h1>
-        <Link href="/orders/new" className="vb-btn" style={{ textDecoration: 'none' }}>New order</Link>
+      <div className="vb-pagehead">
+        <div>
+          <h1 className="vb-h1">Order</h1>
+          <div className="vb-sub">{orders?.length ?? 0} order tercatat</div>
+        </div>
+        <Link href="/orders/new" className="vb-btn">+ Order Baru</Link>
       </div>
       {!orders?.length ? (
-        <p style={{ color: 'var(--vb-muted)' }}>No orders yet.</p>
+        <div className="vb-empty">Belum ada order.</div>
       ) : (
-        <div className="vb-card">
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
-            <thead>
-              <tr style={{ color: 'var(--vb-muted)', textAlign: 'left' }}>
-                <th style={{ padding: 12 }}>Code</th><th style={{ padding: 12 }}>Channel</th>
-                <th style={{ padding: 12 }}>Date</th><th style={{ padding: 12 }}>Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              {orders.map((o) => (
-                <tr key={o.id} style={{ borderTop: '1px solid var(--vb-border)' }}>
-                  <td style={{ padding: 12 }}><Link href={`/orders/${o.id}`} style={{ color: 'var(--vb-accent)' }}>{o.code}</Link></td>
-                  <td style={{ padding: 12 }}>{channelName.get(o.channel_id) ?? '—'}</td>
-                  <td style={{ padding: 12, color: 'var(--vb-muted)' }}>{o.order_date}</td>
-                  <td style={{ padding: 12 }}>{(totalOf.get(o.id) ?? 0).toLocaleString()}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="vb-card" style={{ overflow: 'hidden', maxWidth: 900 }}>
+          <div className="vb-thead" style={{ gridTemplateColumns: '140px 1.2fr 120px 140px' }}>
+            <div>Kode</div><div>Channel</div><div>Tanggal</div><div style={{ textAlign: 'right' }}>Total</div>
+          </div>
+          {orders.map((o) => (
+            <Link key={o.id} href={`/orders/${o.id}`} className="vb-row vb-rowlink" style={{ gridTemplateColumns: '140px 1.2fr 120px 140px', textDecoration: 'none', color: 'inherit' }}>
+              <div className="vb-mono vb-accent" style={{ fontWeight: 500 }}>{o.code}</div>
+              <div>{channelName.get(o.channel_id) ?? '—'}</div>
+              <div className="vb-muted" style={{ fontSize: 12.5 }}>{o.order_date}</div>
+              <div className="vb-mono" style={{ fontWeight: 500, textAlign: 'right' }}>{rp(totalOf.get(o.id) ?? 0)}</div>
+            </Link>
+          ))}
         </div>
       )}
     </div>

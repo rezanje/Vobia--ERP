@@ -1,5 +1,7 @@
+import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { rp } from '@/lib/ui'
 
 export default async function OrderDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -17,32 +19,28 @@ export default async function OrderDetail({ params }: { params: Promise<{ id: st
 
   return (
     <div>
-      <h1 style={{ fontSize: 22, fontWeight: 500 }}>{order.code}</h1>
-      <p style={{ color: 'var(--vb-muted)', marginBottom: 20 }}>{channel?.name ?? '—'} · {order.order_date}{order.customer ? ` · ${order.customer}` : ''}</p>
+      <Link href="/orders" className="vb-back">← Order</Link>
+      <div style={{ marginBottom: 20 }}>
+        <h1 className="vb-h1">{order.code}</h1>
+        <div className="vb-sub">{channel?.name ?? '—'} · {order.order_date}{order.customer ? ` · ${order.customer}` : ''}</div>
+      </div>
 
-      <div className="vb-card">
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
-          <thead>
-            <tr style={{ color: 'var(--vb-muted)', textAlign: 'left' }}>
-              <th style={{ padding: 12 }}>SKU</th><th style={{ padding: 12 }}>Qty</th>
-              <th style={{ padding: 12 }}>Unit price</th><th style={{ padding: 12 }}>Subtotal</th>
-            </tr>
-          </thead>
-          <tbody>
-            {(lines ?? []).map((l) => (
-              <tr key={l.id} style={{ borderTop: '1px solid var(--vb-border)' }}>
-                <td style={{ padding: 12, color: 'var(--vb-accent)' }}>{codeOf.get(l.sku_id) ?? l.sku_id}</td>
-                <td style={{ padding: 12 }}>{l.qty}</td>
-                <td style={{ padding: 12 }}>{Number(l.unit_price).toLocaleString()}</td>
-                <td style={{ padding: 12 }}>{(l.qty * Number(l.unit_price)).toLocaleString()}</td>
-              </tr>
-            ))}
-            <tr style={{ borderTop: '1px solid var(--vb-border)' }}>
-              <td style={{ padding: 12, color: 'var(--vb-muted)' }} colSpan={3}>Total</td>
-              <td style={{ padding: 12, fontWeight: 500 }}>{total.toLocaleString()}</td>
-            </tr>
-          </tbody>
-        </table>
+      <div className="vb-card" style={{ overflow: 'hidden', maxWidth: 760 }}>
+        <div className="vb-thead" style={{ gridTemplateColumns: '1.5fr 70px 140px 140px' }}>
+          <div>Kode SKU</div><div style={{ textAlign: 'right' }}>Qty</div><div style={{ textAlign: 'right' }}>Harga</div><div style={{ textAlign: 'right' }}>Subtotal</div>
+        </div>
+        {(lines ?? []).map((l) => (
+          <div key={l.id} className="vb-row" style={{ gridTemplateColumns: '1.5fr 70px 140px 140px' }}>
+            <div className="vb-mono" style={{ fontWeight: 500 }}>{codeOf.get(l.sku_id) ?? l.sku_id}</div>
+            <div className="vb-mono" style={{ textAlign: 'right' }}>{l.qty}</div>
+            <div className="vb-mono" style={{ textAlign: 'right' }}>{rp(Number(l.unit_price))}</div>
+            <div className="vb-mono" style={{ textAlign: 'right', fontWeight: 500 }}>{rp(l.qty * Number(l.unit_price))}</div>
+          </div>
+        ))}
+        <div className="vb-row" style={{ gridTemplateColumns: '1fr 160px', borderTop: '1px solid var(--vb-border)' }}>
+          <div style={{ fontWeight: 600, fontSize: 12.5 }}>Total</div>
+          <div className="vb-mono vb-accent" style={{ textAlign: 'right', fontWeight: 600, fontSize: 15 }}>{rp(total)}</div>
+        </div>
       </div>
     </div>
   )

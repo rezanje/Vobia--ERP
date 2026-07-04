@@ -8,39 +8,34 @@ export default async function StylesPage() {
     .select('id, code, name, collection, colorway_count, sku_count')
     .order('created_at', { ascending: false })
 
+  const totalSku = (styles ?? []).reduce((s, x) => s + x.sku_count, 0)
+
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-        <h1 style={{ fontSize: 22, fontWeight: 500 }}>Styles</h1>
-        <Link href="/styles/new" className="vb-btn" style={{ textDecoration: 'none' }}>New style</Link>
+      <div className="vb-pagehead">
+        <div>
+          <h1 className="vb-h1">Styles</h1>
+          <div className="vb-sub">{styles?.length ?? 0} style · {totalSku} SKU</div>
+        </div>
+        <Link href="/styles/new" className="vb-btn">+ Style Baru</Link>
       </div>
 
       {!styles?.length ? (
-        <p style={{ color: 'var(--vb-muted)' }}>No styles yet. Create your first style.</p>
+        <div className="vb-empty">Belum ada style. Buat style pertama Anda.</div>
       ) : (
-        <div className="vb-card">
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
-            <thead>
-              <tr style={{ color: 'var(--vb-muted)', textAlign: 'left' }}>
-                <th style={{ padding: 12 }}>Code</th><th style={{ padding: 12 }}>Name</th>
-                <th style={{ padding: 12 }}>Collection</th><th style={{ padding: 12 }}>Colorways</th>
-                <th style={{ padding: 12 }}>SKUs</th>
-              </tr>
-            </thead>
-            <tbody>
-              {styles.map((s) => (
-                <tr key={s.id} style={{ borderTop: '1px solid var(--vb-border)' }}>
-                  <td style={{ padding: 12 }}>
-                    <Link href={`/styles/${s.id}`} style={{ color: 'var(--vb-accent)' }}>{s.code}</Link>
-                  </td>
-                  <td style={{ padding: 12 }}>{s.name}</td>
-                  <td style={{ padding: 12, color: 'var(--vb-muted)' }}>{s.collection ?? '—'}</td>
-                  <td style={{ padding: 12 }}>{s.colorway_count}</td>
-                  <td style={{ padding: 12 }}>{s.sku_count}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="vb-card" style={{ overflow: 'hidden' }}>
+          <div className="vb-thead" style={{ gridTemplateColumns: '110px 1.7fr 1.3fr 90px 70px' }}>
+            <div>Kode</div><div>Nama</div><div>Koleksi</div><div style={{ textAlign: 'right' }}>Colorway</div><div style={{ textAlign: 'right' }}>SKU</div>
+          </div>
+          {styles.map((s) => (
+            <Link key={s.id} href={`/styles/${s.id}`} className="vb-row vb-rowlink" style={{ gridTemplateColumns: '110px 1.7fr 1.3fr 90px 70px', textDecoration: 'none', color: 'inherit' }}>
+              <div className="vb-mono vb-accent" style={{ fontWeight: 500 }}>{s.code}</div>
+              <div style={{ fontWeight: 500 }}>{s.name}</div>
+              <div className="vb-muted">{s.collection ?? '—'}</div>
+              <div className="vb-mono" style={{ textAlign: 'right' }}>{s.colorway_count}</div>
+              <div className="vb-mono" style={{ textAlign: 'right' }}>{s.sku_count}</div>
+            </Link>
+          ))}
         </div>
       )}
     </div>

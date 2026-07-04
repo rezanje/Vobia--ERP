@@ -12,7 +12,7 @@ export default function VendorForm() {
 
   async function onSave() {
     setError(null)
-    if (!name.trim()) { setError('Name is required'); return }
+    if (!name.trim()) { setError('Nama wajib diisi'); return }
     setSaving(true)
     const res = await createVendor({ name: name.trim(), contact: contact.trim() })
     setSaving(false)
@@ -21,13 +21,19 @@ export default function VendorForm() {
   }
 
   return (
-    <div className="vb-card" style={{ padding: 16, maxWidth: 520, marginBottom: 24 }}>
-      <div style={{ fontWeight: 500, marginBottom: 12 }}>New vendor</div>
-      {error && <div style={{ color: '#ff9b9b', marginBottom: 8 }}>{error}</div>}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        <input className="vb-input" placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} />
-        <input className="vb-input" placeholder="Contact (optional)" value={contact} onChange={(e) => setContact(e.target.value)} />
-        <button className="vb-btn" type="button" disabled={saving} onClick={onSave}>{saving ? 'Saving…' : 'Add vendor'}</button>
+    <div className="vb-card" style={{ padding: 18 }}>
+      <div className="vb-cardtitle" style={{ marginBottom: 12 }}>Vendor Baru</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div>
+          <label className="vb-label">Nama</label>
+          <input className="vb-input" placeholder="CV Maju Garmen" value={name} onChange={(e) => setName(e.target.value)} />
+        </div>
+        <div>
+          <label className="vb-label">Kontak</label>
+          <input className="vb-input" placeholder="Pak Budi · 0812-xxxx-xxxx" value={contact} onChange={(e) => setContact(e.target.value)} />
+        </div>
+        {error && <div className="vb-danger">{error}</div>}
+        <button className="vb-btn" type="button" disabled={saving} onClick={onSave} style={{ alignSelf: 'flex-end' }}>{saving ? 'Menyimpan…' : 'Simpan Vendor'}</button>
       </div>
     </div>
   )

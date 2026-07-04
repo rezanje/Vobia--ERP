@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import AdjustForm from './AdjustForm'
+import { MOVEMENT_META, rp } from '@/lib/ui'
 
 export default async function StockPage() {
   const supabase = await createClient()
@@ -16,53 +17,51 @@ export default async function StockPage() {
 
   return (
     <div>
-      <h1 style={{ fontSize: 22, fontWeight: 500, marginBottom: 20 }}>Stock</h1>
-
-      <AdjustForm skus={skus ?? []} />
-
-      <div style={{ color: 'var(--vb-muted)', marginBottom: 6 }}>Balances</div>
-      <div className="vb-card" style={{ marginBottom: 24 }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
-          <thead>
-            <tr style={{ color: 'var(--vb-muted)', textAlign: 'left' }}>
-              <th style={{ padding: 12 }}>SKU</th><th style={{ padding: 12 }}>Balance</th>
-            </tr>
-          </thead>
-          <tbody>
-            {!balances?.length ? (
-              <tr><td style={{ padding: 12, color: 'var(--vb-muted)' }} colSpan={2}>No movements yet.</td></tr>
-            ) : balances.map((b) => (
-              <tr key={b.sku_id} style={{ borderTop: '1px solid var(--vb-border)' }}>
-                <td style={{ padding: 12 }}>{codeOf.get(b.sku_id ?? '') ?? b.sku_id}</td>
-                <td style={{ padding: 12, color: (b.balance ?? 0) < 0 ? '#ff9b9b' : 'var(--vb-text)' }}>{b.balance}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div style={{ marginBottom: 20 }}>
+        <h1 className="vb-h1">Stok</h1>
+        <div className="vb-sub">{balances?.length ?? 0} SKU tercatat</div>
       </div>
 
-      <div style={{ color: 'var(--vb-muted)', marginBottom: 6 }}>Recent movements</div>
-      <div className="vb-card">
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
-          <thead>
-            <tr style={{ color: 'var(--vb-muted)', textAlign: 'left' }}>
-              <th style={{ padding: 12 }}>SKU</th><th style={{ padding: 12 }}>Type</th>
-              <th style={{ padding: 12 }}>Qty</th><th style={{ padding: 12 }}>Reason</th>
-            </tr>
-          </thead>
-          <tbody>
-            {!movements?.length ? (
-              <tr><td style={{ padding: 12, color: 'var(--vb-muted)' }} colSpan={4}>No movements yet.</td></tr>
-            ) : movements.map((m) => (
-              <tr key={m.id} style={{ borderTop: '1px solid var(--vb-border)' }}>
-                <td style={{ padding: 12 }}>{codeOf.get(m.sku_id) ?? m.sku_id}</td>
-                <td style={{ padding: 12, color: 'var(--vb-muted)' }}>{m.movement_type}</td>
-                <td style={{ padding: 12 }}>{m.qty}</td>
-                <td style={{ padding: 12, color: 'var(--vb-muted)' }}>{m.reason ?? '—'}</td>
-              </tr>
+      <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 1.7fr', gap: 12, alignItems: 'start' }}>
+        <div className="vb-card" style={{ overflow: 'hidden' }}>
+          <div className="vb-cardtitle" style={{ padding: '14px 16px 10px' }}>Saldo SKU</div>
+          <div className="vb-thead" style={{ gridTemplateColumns: '1fr 90px' }}>
+            <div>Kode SKU</div><div style={{ textAlign: 'right' }}>Saldo</div>
+          </div>
+          <div style={{ maxHeight: 560, overflowY: 'auto' }}>
+            {!balances?.length ? (
+              <div className="vb-empty">Belum ada pergerakan.</div>
+            ) : balances.map((b) => (
+              <div key={b.sku_id} className="vb-row" style={{ gridTemplateColumns: '1fr 90px' }}>
+                <div className="vb-mono" style={{ fontWeight: 500, fontSize: 12.5 }}>{codeOf.get(b.sku_id ?? '') ?? b.sku_id}</div>
+                <div className="vb-mono" style={{ textAlign: 'right', fontWeight: 600, color: (b.balance ?? 0) < 0 ? 'var(--vb-danger)' : 'var(--vb-text)' }}>{b.balance}</div>
+              </div>
             ))}
-          </tbody>
-        </table>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <AdjustForm skus={skus ?? []} />
+          <div className="vb-card" style={{ overflow: 'hidden' }}>
+            <div className="vb-cardtitle" style={{ padding: '14px 16px 10px' }}>Pergerakan Terakhir</div>
+            <div className="vb-thead" style={{ gridTemplateColumns: '1.3fr 130px 60px 1.4fr' }}>
+              <div>Kode SKU</div><div>Tipe</div><div style={{ textAlign: 'right' }}>Qty</div><div>Alasan</div>
+            </div>
+            {!movements?.length ? (
+              <div className="vb-empty">Belum ada pergerakan.</div>
+            ) : movements.map((m) => {
+              const meta = MOVEMENT_META[m.movement_type] ?? { label: m.movement_type, c: 'var(--vb-muted)', bg: 'transparent' }
+              return (
+                <div key={m.id} className="vb-row" style={{ gridTemplateColumns: '1.3fr 130px 60px 1.4fr' }}>
+                  <div className="vb-mono" style={{ fontWeight: 500, fontSize: 12.5 }}>{codeOf.get(m.sku_id) ?? m.sku_id}</div>
+                  <div><span className="vb-badge" style={{ background: meta.bg, color: meta.c }}>{meta.label}</span></div>
+                  <div className="vb-mono" style={{ textAlign: 'right', fontWeight: 600, color: m.qty < 0 ? 'var(--vb-danger)' : '#93d6a1' }}>{rp(m.qty)}</div>
+                  <div className="vb-muted" style={{ fontSize: 12.5 }}>{m.reason ?? '—'}</div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
       </div>
     </div>
   )

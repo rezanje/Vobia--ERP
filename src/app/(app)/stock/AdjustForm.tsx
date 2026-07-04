@@ -16,9 +16,9 @@ export default function AdjustForm({ skus }: { skus: SkuOption[] }) {
   async function onSave() {
     setError(null)
     const n = parseInt(qty, 10)
-    if (!skuId) { setError('Pick a SKU'); return }
-    if (!Number.isInteger(n) || n === 0) { setError('Qty must be a non-zero integer'); return }
-    if (!reason.trim()) { setError('Reason is required'); return }
+    if (!skuId) { setError('Pilih SKU'); return }
+    if (!Number.isInteger(n) || n === 0) { setError('Qty harus angka bukan nol'); return }
+    if (!reason.trim()) { setError('Alasan wajib diisi'); return }
     setSaving(true)
     const res = await recordAdjustment({ sku_id: skuId, qty: n, reason: reason.trim() })
     setSaving(false)
@@ -28,18 +28,27 @@ export default function AdjustForm({ skus }: { skus: SkuOption[] }) {
   }
 
   return (
-    <div className="vb-card" style={{ padding: 16, maxWidth: 520, marginBottom: 24 }}>
-      <div style={{ fontWeight: 500, marginBottom: 12 }}>Adjustment</div>
-      {error && <div style={{ color: '#ff9b9b', marginBottom: 8 }}>{error}</div>}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        <select className="vb-input" value={skuId} onChange={(e) => setSkuId(e.target.value)}>
-          <option value="">Select SKU…</option>
-          {skus.map((s) => <option key={s.id} value={s.id}>{s.sku_code}</option>)}
-        </select>
-        <input className="vb-input" placeholder="Qty (e.g. 15 or -5)" value={qty} onChange={(e) => setQty(e.target.value)} />
-        <input className="vb-input" placeholder="Reason" value={reason} onChange={(e) => setReason(e.target.value)} />
-        <button className="vb-btn" type="button" disabled={saving} onClick={onSave}>
-          {saving ? 'Saving…' : 'Record adjustment'}
+    <div className="vb-card" style={{ padding: 18 }}>
+      <div className="vb-cardtitle" style={{ marginBottom: 12 }}>Penyesuaian Stok</div>
+      {error && <div className="vb-danger" style={{ marginBottom: 8, fontSize: 12.5 }}>{error}</div>}
+      <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 100px 1.4fr auto', gap: 10, alignItems: 'end' }}>
+        <div>
+          <label className="vb-label">SKU</label>
+          <select className="vb-input" value={skuId} onChange={(e) => setSkuId(e.target.value)}>
+            <option value="">Pilih SKU…</option>
+            {skus.map((s) => <option key={s.id} value={s.id}>{s.sku_code}</option>)}
+          </select>
+        </div>
+        <div>
+          <label className="vb-label">Qty (±)</label>
+          <input className="vb-input" placeholder="-2" value={qty} onChange={(e) => setQty(e.target.value)} />
+        </div>
+        <div>
+          <label className="vb-label">Alasan</label>
+          <input className="vb-input" placeholder="Stock opname" value={reason} onChange={(e) => setReason(e.target.value)} />
+        </div>
+        <button className="vb-btn" type="button" disabled={saving} onClick={onSave} style={{ height: 37 }}>
+          {saving ? 'Menyimpan…' : 'Simpan'}
         </button>
       </div>
     </div>

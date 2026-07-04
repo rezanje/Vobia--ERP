@@ -11,32 +11,28 @@ export default async function ReturnsPage() {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-        <h1 style={{ fontSize: 22, fontWeight: 500 }}>Returns</h1>
-        <Link href="/returns/new" className="vb-btn" style={{ textDecoration: 'none' }}>New return</Link>
+      <div className="vb-pagehead">
+        <div>
+          <h1 className="vb-h1">Retur</h1>
+          <div className="vb-sub">{returns?.length ?? 0} retur tercatat</div>
+        </div>
+        <Link href="/returns/new" className="vb-btn">+ Retur Baru</Link>
       </div>
       {!returns?.length ? (
-        <p style={{ color: 'var(--vb-muted)' }}>No returns yet.</p>
+        <div className="vb-empty">Belum ada retur.</div>
       ) : (
-        <div className="vb-card">
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
-            <thead>
-              <tr style={{ color: 'var(--vb-muted)', textAlign: 'left' }}>
-                <th style={{ padding: 12 }}>Code</th><th style={{ padding: 12 }}>Order</th>
-                <th style={{ padding: 12 }}>Date</th><th style={{ padding: 12 }}>Reason</th>
-              </tr>
-            </thead>
-            <tbody>
-              {returns.map((r) => (
-                <tr key={r.id} style={{ borderTop: '1px solid var(--vb-border)' }}>
-                  <td style={{ padding: 12 }}><Link href={`/returns/${r.id}`} style={{ color: 'var(--vb-accent)' }}>{r.code}</Link></td>
-                  <td style={{ padding: 12 }}>{orderCode.get(r.order_id) ?? '—'}</td>
-                  <td style={{ padding: 12, color: 'var(--vb-muted)' }}>{r.return_date}</td>
-                  <td style={{ padding: 12, color: 'var(--vb-muted)' }}>{r.reason ?? '—'}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="vb-card" style={{ overflow: 'hidden', maxWidth: 900 }}>
+          <div className="vb-thead" style={{ gridTemplateColumns: '130px 140px 120px 1.5fr' }}>
+            <div>Kode</div><div>Order</div><div>Tanggal</div><div>Alasan</div>
+          </div>
+          {returns.map((r) => (
+            <Link key={r.id} href={`/returns/${r.id}`} className="vb-row vb-rowlink" style={{ gridTemplateColumns: '130px 140px 120px 1.5fr', textDecoration: 'none', color: 'inherit' }}>
+              <div className="vb-mono vb-accent" style={{ fontWeight: 500 }}>{r.code}</div>
+              <div className="vb-mono" style={{ fontSize: 12.5 }}>{orderCode.get(r.order_id) ?? '—'}</div>
+              <div className="vb-muted" style={{ fontSize: 12.5 }}>{r.return_date}</div>
+              <div className="vb-text2">{r.reason ?? '—'}</div>
+            </Link>
+          ))}
         </div>
       )}
     </div>

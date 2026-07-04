@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import SkuToggle from './SkuToggle'
@@ -17,31 +18,27 @@ export default async function StyleDetail({ params }: { params: Promise<{ id: st
 
   return (
     <div>
-      <h1 style={{ fontSize: 22, fontWeight: 500 }}>{style.name}</h1>
-      <p style={{ color: 'var(--vb-muted)', marginBottom: 20 }}>{style.code}{style.collection ? ` · ${style.collection}` : ''}</p>
+      <Link href="/styles" className="vb-back">← Styles</Link>
+      <div style={{ marginBottom: 20 }}>
+        <h1 className="vb-h1">{style.name}</h1>
+        <div className="vb-sub">{style.code}{style.collection ? ` · ${style.collection}` : ''}</div>
+      </div>
 
-      <div className="vb-card" style={{ padding: 0 }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
-          <thead>
-            <tr style={{ color: 'var(--vb-muted)', textAlign: 'left' }}>
-              <th style={{ padding: 12 }}>Colorway</th><th style={{ padding: 12 }}>Size</th>
-              <th style={{ padding: 12 }}>SKU code</th><th style={{ padding: 12 }}>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {(skus ?? []).map((k) => {
-              const cw = colorways?.find((c) => c.id === k.colorway_id)
-              return (
-                <tr key={k.id} style={{ borderTop: '1px solid var(--vb-border)' }}>
-                  <td style={{ padding: 12 }}>{cw?.color_name ?? '—'}</td>
-                  <td style={{ padding: 12 }}>{k.size}</td>
-                  <td style={{ padding: 12, color: 'var(--vb-accent)' }}>{k.sku_code}</td>
-                  <td style={{ padding: 12 }}><SkuToggle id={k.id} active={k.active} /></td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
+      <div className="vb-card" style={{ overflow: 'hidden', maxWidth: 820 }}>
+        <div className="vb-thead" style={{ gridTemplateColumns: '1.5fr 1.2fr 70px 130px' }}>
+          <div>Kode SKU</div><div>Colorway</div><div>Size</div><div>Status</div>
+        </div>
+        {(skus ?? []).map((k) => {
+          const cw = colorways?.find((c) => c.id === k.colorway_id)
+          return (
+            <div key={k.id} className="vb-row" style={{ gridTemplateColumns: '1.5fr 1.2fr 70px 130px' }}>
+              <div className="vb-mono" style={{ fontWeight: 500 }}>{k.sku_code}</div>
+              <div className="vb-text2">{cw?.color_name ?? '—'}</div>
+              <div className="vb-mono">{k.size}</div>
+              <SkuToggle id={k.id} active={k.active} />
+            </div>
+          )
+        })}
       </div>
     </div>
   )
