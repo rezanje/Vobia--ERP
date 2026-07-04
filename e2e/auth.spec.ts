@@ -31,9 +31,10 @@ test('login renders the tenant-scoped dashboard', async ({ page }) => {
     await page.fill('input[name="password"]', password)
     await page.click('button[type="submit"]')
 
-    await expect(page.getByText(email)).toBeVisible()
-    // exactly one profile row visible in the JSON dump → tenant isolation holds
-    await expect(page.getByText('"role": "owner"')).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible()
+    // a brand-new tenant has zero cross-tenant data → both empty states render
+    await expect(page.getByText('Tidak ada SKU oversold. Semua saldo aman.')).toBeVisible()
+    await expect(page.getByText('Belum ada order.')).toBeVisible()
   } finally {
     await admin.auth.admin.deleteUser(userId)
   }
