@@ -173,6 +173,10 @@ export type Database = {
         Args: { p_sku_id: string; p_qty: number; p_movement_type: string; p_reason?: string; p_ref_type?: string; p_ref_id?: string; p_location_id?: string }
         Returns: string
       }
+      record_transfer: {
+        Args: { p_sku_id: string; p_qty: number; p_from_location: string; p_to_location: string; p_reason?: string }
+        Returns: undefined
+      }
       create_production_order: {
         Args: { p_style_id: string; p_vendor_id: string; p_deadline?: string | null; p_notes: string; p_lines: Json }
         Returns: string

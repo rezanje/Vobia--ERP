@@ -9,6 +9,7 @@ do $$
 declare
   v_tenant uuid := (select tenant_id from public.profiles where id='c1111111-1111-1111-1111-111111111111');
   v_loc uuid;
+  v_loc2 uuid;
   v_style uuid; v_sku uuid; v_bal int;
 begin
   perform set_config('request.jwt.claims',
@@ -28,7 +29,7 @@ begin
   if v_bal <> 10 then raise exception 'expected 10 at default location, got %', v_bal; end if;
 
   -- explicit location routes there, not to default
-  declare v_loc2 uuid; v_bal2 int;
+  declare v_bal2 int;
   begin
     insert into public.locations (name) values ('Toko Kedua') returning id into v_loc2;
     perform public.record_movement(v_sku, 4, 'production_in', null, null, null, v_loc2);
@@ -61,6 +62,38 @@ begin
     exception when others then
       if sqlerrm not like '%another tenant%' then raise; end if;
     end;
+  end;
+
+  -- transfer 6 from default to Toko Kedua conserves the total (14)
+  declare v_total_before int; v_total_after int;
+  begin
+    select coalesce(sum(qty),0) into v_total_before from public.stock_ledger where sku_id = v_sku;
+    perform public.record_transfer(v_sku, 6, v_loc, v_loc2, 'pindah toko');
+    select coalesce(sum(qty),0) into v_total_after from public.stock_ledger where sku_id = v_sku;
+    if v_total_before <> v_total_after then
+      raise exception 'transfer changed total: % -> %', v_total_before, v_total_after;
+    end if;
+    -- default now 4, Toko Kedua now 10
+    if (select balance from public.stock_balances_by_location where sku_id=v_sku and location_id=v_loc) <> 4
+      then raise exception 'expected 4 at default after transfer'; end if;
+    if (select balance from public.stock_balances_by_location where sku_id=v_sku and location_id=v_loc2) <> 10
+      then raise exception 'expected 10 at Toko Kedua after transfer'; end if;
+  end;
+
+  -- overdraw is rejected (default has 4, ask for 999)
+  begin
+    perform public.record_transfer(v_sku, 999, v_loc, v_loc2, 'x');
+    raise exception 'OVERDRAW_SHOULD_FAIL';
+  exception when others then
+    if sqlerrm not like '%insufficient%' then raise; end if;
+  end;
+
+  -- from == to is rejected
+  begin
+    perform public.record_transfer(v_sku, 1, v_loc, v_loc, 'x');
+    raise exception 'SAME_LOC_SHOULD_FAIL';
+  exception when others then
+    if sqlerrm not like '%differ%' then raise; end if;
   end;
 
   raise notice 'stock_location OK: default location balance view works';
