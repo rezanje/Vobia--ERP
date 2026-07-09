@@ -76,6 +76,12 @@ export type Database = {
         Update: { id?: string; tenant_id?: string; name?: string; is_default?: boolean; active?: boolean; created_at?: string }
         Relationships: []
       }
+      materials: {
+        Row: { id: string; tenant_id: string; code: string; name: string; category: string; uom: string; active: boolean; created_at: string }
+        Insert: { id?: string; tenant_id?: string; code: string; name: string; category: string; uom: string; active?: boolean; created_at?: string }
+        Update: { id?: string; tenant_id?: string; code?: string; name?: string; category?: string; uom?: string; active?: boolean; created_at?: string }
+        Relationships: []
+      }
       stock_ledger: {
         Row: { id: string; tenant_id: string; sku_id: string; qty: number; movement_type: string; reason: string | null; ref_type: string | null; ref_id: string | null; created_by: string | null; created_at: string }
         Insert: { id?: string; tenant_id: string; sku_id: string; qty: number; movement_type: string; reason?: string | null; ref_type?: string | null; ref_id?: string | null; created_by?: string | null; created_at?: string }
