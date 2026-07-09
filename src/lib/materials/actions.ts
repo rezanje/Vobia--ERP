@@ -12,9 +12,3 @@ export async function createMaterial(input: {
   if (error) return { error: error.message }
   revalidatePath('/materials')
 }
-
-export async function toggleMaterial(id: string, active: boolean): Promise<void> {
-  const supabase = await createClient()
-  await supabase.from('materials').update({ active }).eq('id', id)
-  revalidatePath('/materials')
-}

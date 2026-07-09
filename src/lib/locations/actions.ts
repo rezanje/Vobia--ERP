@@ -8,9 +8,3 @@ export async function createLocation(input: { name: string }): Promise<{ error: 
   if (error) return { error: error.message }
   revalidatePath('/locations')
 }
-
-export async function toggleLocation(id: string, active: boolean): Promise<void> {
-  const supabase = await createClient()
-  await supabase.from('locations').update({ active }).eq('id', id)
-  revalidatePath('/locations')
-}
