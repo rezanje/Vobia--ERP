@@ -27,6 +27,42 @@ begin
     where sku_id = v_sku and location_id = v_loc;
   if v_bal <> 10 then raise exception 'expected 10 at default location, got %', v_bal; end if;
 
+  -- explicit location routes there, not to default
+  declare v_loc2 uuid; v_bal2 int;
+  begin
+    insert into public.locations (name) values ('Toko Kedua') returning id into v_loc2;
+    perform public.record_movement(v_sku, 4, 'production_in', null, null, null, v_loc2);
+    select balance into v_bal2 from public.stock_balances_by_location
+      where sku_id = v_sku and location_id = v_loc2;
+    if v_bal2 <> 4 then raise exception 'expected 4 at Toko Kedua, got %', v_bal2; end if;
+
+    -- default location still holds the original 10
+    select balance into v_bal from public.stock_balances_by_location
+      where sku_id = v_sku and location_id = v_loc;
+    if v_bal <> 10 then raise exception 'expected 10 still at default, got %', v_bal; end if;
+  end;
+
+  -- cross-tenant location is rejected
+  declare v_foreign_loc uuid;
+  begin
+    perform set_config('role', null, true); reset role;
+    insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data)
+      values ('c9999999-9999-9999-9999-999999999999','00000000-0000-0000-0000-000000000000',
+              'authenticated','authenticated','stlx@s.test','{"tenant_name":"Stl X"}');
+    select id into v_foreign_loc from public.locations
+      where tenant_id = (select tenant_id from public.profiles where id='c9999999-9999-9999-9999-999999999999')
+        and is_default;
+    perform set_config('request.jwt.claims',
+      json_build_object('sub','c1111111-1111-1111-1111-111111111111','role','authenticated','tenant_id',v_tenant::text)::text, true);
+    perform set_config('role','authenticated', true);
+    begin
+      perform public.record_movement(v_sku, 1, 'production_in', null, null, null, v_foreign_loc);
+      raise exception 'FOREIGN_LOC_SHOULD_FAIL';
+    exception when others then
+      if sqlerrm not like '%another tenant%' then raise; end if;
+    end;
+  end;
+
   raise notice 'stock_location OK: default location balance view works';
 end $$;
 
