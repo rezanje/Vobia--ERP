@@ -83,9 +83,9 @@ export type Database = {
         Relationships: []
       }
       stock_ledger: {
-        Row: { id: string; tenant_id: string; sku_id: string; qty: number; movement_type: string; reason: string | null; ref_type: string | null; ref_id: string | null; created_by: string | null; created_at: string }
-        Insert: { id?: string; tenant_id: string; sku_id: string; qty: number; movement_type: string; reason?: string | null; ref_type?: string | null; ref_id?: string | null; created_by?: string | null; created_at?: string }
-        Update: { id?: string; tenant_id?: string; sku_id?: string; qty?: number; movement_type?: string; reason?: string | null; ref_type?: string | null; ref_id?: string | null; created_by?: string | null; created_at?: string }
+        Row: { id: string; tenant_id: string; sku_id: string; location_id: string; qty: number; movement_type: string; reason: string | null; ref_type: string | null; ref_id: string | null; created_by: string | null; created_at: string }
+        Insert: { id?: string; tenant_id: string; sku_id: string; location_id: string; qty: number; movement_type: string; reason?: string | null; ref_type?: string | null; ref_id?: string | null; created_by?: string | null; created_at?: string }
+        Update: { id?: string; tenant_id?: string; sku_id?: string; location_id?: string; qty?: number; movement_type?: string; reason?: string | null; ref_type?: string | null; ref_id?: string | null; created_by?: string | null; created_at?: string }
         Relationships: []
       }
       vendors: {
@@ -150,6 +150,10 @@ export type Database = {
       }
       stock_balances: {
         Row: { sku_id: string | null; tenant_id: string | null; balance: number | null }
+        Relationships: []
+      }
+      stock_balances_by_location: {
+        Row: { sku_id: string | null; location_id: string | null; tenant_id: string | null; balance: number | null }
         Relationships: []
       }
       sku_hpp: {
