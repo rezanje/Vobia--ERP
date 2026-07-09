@@ -13,6 +13,8 @@ export const MOVEMENT_META: Record<string, { label: string; c: string; bg: strin
   sale_out: { label: 'Penjualan', c: '#9fc0e8', bg: 'rgba(159,192,232,.13)' },
   return_in: { label: 'Retur Masuk', c: '#eda06a', bg: 'rgba(237,160,106,.13)' },
   adjustment: { label: 'Penyesuaian', c: '#cdc6b8', bg: 'rgba(205,198,184,.13)' },
+  transfer_out: { label: 'Transfer Keluar', c: '#eda06a', bg: 'rgba(237,160,106,.13)' },
+  transfer_in: { label: 'Transfer Masuk', c: '#9fc0e8', bg: 'rgba(159,192,232,.13)' },
 }
 
 export const COST_LABELS: Record<string, string> = {
