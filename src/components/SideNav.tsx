@@ -8,6 +8,7 @@ const GROUPS: { title?: string; items: { label: string; href: string }[] }[] = [
   { title: 'Produk', items: [{ label: 'Styles', href: '/styles' }, { label: 'Stok', href: '/stock' }, { label: 'HPP', href: '/costing' }] },
   { title: 'Produksi', items: [{ label: 'Produksi', href: '/production' }, { label: 'Vendor', href: '/vendors' }] },
   { title: 'Penjualan', items: [{ label: 'Order', href: '/orders' }, { label: 'Channel', href: '/channels' }, { label: 'Retur', href: '/returns' }] },
+  { title: 'Pengaturan', items: [{ label: 'Lokasi', href: '/locations' }] },
 ]
 
 export default function SideNav() {
