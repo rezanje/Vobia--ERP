@@ -187,6 +187,10 @@ export type Database = {
         Args: { p_sku_id: string; p_qty: number; p_movement_type: string; p_reason?: string; p_ref_type?: string; p_ref_id?: string; p_location_id?: string }
         Returns: string
       }
+      record_material_movement: {
+        Args: { p_material_id: string; p_qty: number; p_movement_type: string; p_reason?: string; p_ref_type?: string; p_ref_id?: string; p_location_id?: string }
+        Returns: string
+      }
       record_transfer: {
         Args: { p_sku_id: string; p_qty: number; p_from_location: string; p_to_location: string; p_reason?: string }
         Returns: undefined
