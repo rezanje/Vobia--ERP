@@ -70,10 +70,22 @@ export type Database = {
         Update: { id?: string; tenant_id?: string; colorway_id?: string; size?: string; sku_code?: string; active?: boolean; created_at?: string }
         Relationships: []
       }
+      locations: {
+        Row: { id: string; tenant_id: string; name: string; is_default: boolean; active: boolean; created_at: string }
+        Insert: { id?: string; tenant_id?: string; name: string; is_default?: boolean; active?: boolean; created_at?: string }
+        Update: { id?: string; tenant_id?: string; name?: string; is_default?: boolean; active?: boolean; created_at?: string }
+        Relationships: []
+      }
+      materials: {
+        Row: { id: string; tenant_id: string; code: string; name: string; category: string; uom: string; active: boolean; created_at: string }
+        Insert: { id?: string; tenant_id?: string; code: string; name: string; category: string; uom: string; active?: boolean; created_at?: string }
+        Update: { id?: string; tenant_id?: string; code?: string; name?: string; category?: string; uom?: string; active?: boolean; created_at?: string }
+        Relationships: []
+      }
       stock_ledger: {
-        Row: { id: string; tenant_id: string; sku_id: string; qty: number; movement_type: string; reason: string | null; ref_type: string | null; ref_id: string | null; created_by: string | null; created_at: string }
-        Insert: { id?: string; tenant_id: string; sku_id: string; qty: number; movement_type: string; reason?: string | null; ref_type?: string | null; ref_id?: string | null; created_by?: string | null; created_at?: string }
-        Update: { id?: string; tenant_id?: string; sku_id?: string; qty?: number; movement_type?: string; reason?: string | null; ref_type?: string | null; ref_id?: string | null; created_by?: string | null; created_at?: string }
+        Row: { id: string; tenant_id: string; sku_id: string; location_id: string; qty: number; movement_type: string; reason: string | null; ref_type: string | null; ref_id: string | null; created_by: string | null; created_at: string }
+        Insert: { id?: string; tenant_id: string; sku_id: string; location_id: string; qty: number; movement_type: string; reason?: string | null; ref_type?: string | null; ref_id?: string | null; created_by?: string | null; created_at?: string }
+        Update: { id?: string; tenant_id?: string; sku_id?: string; location_id?: string; qty?: number; movement_type?: string; reason?: string | null; ref_type?: string | null; ref_id?: string | null; created_by?: string | null; created_at?: string }
         Relationships: []
       }
       vendors: {
@@ -140,6 +152,10 @@ export type Database = {
         Row: { sku_id: string | null; tenant_id: string | null; balance: number | null }
         Relationships: []
       }
+      stock_balances_by_location: {
+        Row: { sku_id: string | null; location_id: string | null; tenant_id: string | null; balance: number | null }
+        Relationships: []
+      }
       sku_hpp: {
         Row: { tenant_id: string | null; sku_id: string | null; hpp: number | null; costed_units: number | null }
         Relationships: []
@@ -154,8 +170,12 @@ export type Database = {
         Returns: string
       }
       record_movement: {
-        Args: { p_sku_id: string; p_qty: number; p_movement_type: string; p_reason?: string; p_ref_type?: string; p_ref_id?: string }
+        Args: { p_sku_id: string; p_qty: number; p_movement_type: string; p_reason?: string; p_ref_type?: string; p_ref_id?: string; p_location_id?: string }
         Returns: string
+      }
+      record_transfer: {
+        Args: { p_sku_id: string; p_qty: number; p_from_location: string; p_to_location: string; p_reason?: string }
+        Returns: undefined
       }
       create_production_order: {
         Args: { p_style_id: string; p_vendor_id: string; p_deadline?: string | null; p_notes: string; p_lines: Json }
