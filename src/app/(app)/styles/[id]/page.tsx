@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import SkuToggle from './SkuToggle'
+import BomSection from './BomSection'
 
 export default async function StyleDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -15,6 +16,9 @@ export default async function StyleDetail({ params }: { params: Promise<{ id: st
   const cwIds = (colorways ?? []).map((c) => c.id)
   const { data: skus } = await supabase
     .from('skus').select('id, colorway_id, size, sku_code, active').in('colorway_id', cwIds.length ? cwIds : ['00000000-0000-0000-0000-000000000000'])
+
+  const { data: bomRows } = await supabase.from('bom_lines').select('id, material_id, qty_per_unit').eq('style_id', id)
+  const { data: allMaterials } = await supabase.from('materials').select('id, code, name').eq('active', true).order('code')
 
   return (
     <div>
@@ -40,6 +44,12 @@ export default async function StyleDetail({ params }: { params: Promise<{ id: st
           )
         })}
       </div>
+
+      <BomSection
+        styleId={id}
+        materials={allMaterials ?? []}
+        rows={(bomRows ?? []).map((r) => ({ id: r.id, material_id: r.material_id, qty_per_unit: Number(r.qty_per_unit) }))}
+      />
     </div>
   )
 }
