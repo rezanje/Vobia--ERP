@@ -237,6 +237,10 @@ export type Database = {
         Args: { p_po_id: string; p_receipts: Json }
         Returns: undefined
       }
+      issue_material_to_po: {
+        Args: { p_prod_po_id: string; p_issues: Json; p_location_id?: string | null }
+        Returns: undefined
+      }
     }
     Enums: { [_ in never]: never }
     CompositeTypes: { [_ in never]: never }
