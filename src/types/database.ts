@@ -82,6 +82,12 @@ export type Database = {
         Update: { id?: string; tenant_id?: string; code?: string; name?: string; category?: string; uom?: string; active?: boolean; created_at?: string }
         Relationships: []
       }
+      material_ledger: {
+        Row: { id: string; tenant_id: string; material_id: string; location_id: string; qty: number; movement_type: string; reason: string | null; ref_type: string | null; ref_id: string | null; created_by: string | null; created_at: string }
+        Insert: { id?: string; tenant_id: string; material_id: string; location_id: string; qty: number; movement_type: string; reason?: string | null; ref_type?: string | null; ref_id?: string | null; created_by?: string | null; created_at?: string }
+        Update: { id?: string; tenant_id?: string; material_id?: string; location_id?: string; qty?: number; movement_type?: string; reason?: string | null; ref_type?: string | null; ref_id?: string | null; created_by?: string | null; created_at?: string }
+        Relationships: []
+      }
       stock_ledger: {
         Row: { id: string; tenant_id: string; sku_id: string; location_id: string; qty: number; movement_type: string; reason: string | null; ref_type: string | null; ref_id: string | null; created_by: string | null; created_at: string }
         Insert: { id?: string; tenant_id: string; sku_id: string; location_id: string; qty: number; movement_type: string; reason?: string | null; ref_type?: string | null; ref_id?: string | null; created_by?: string | null; created_at?: string }
@@ -130,6 +136,24 @@ export type Database = {
         Update: { id?: string; tenant_id?: string; order_id?: string; sku_id?: string; qty?: number; unit_price?: number; created_at?: string }
         Relationships: []
       }
+      purchase_orders: {
+        Row: { id: string; tenant_id: string; code: string; vendor_id: string; location_id: string; order_date: string; status: string; notes: string | null; created_at: string }
+        Insert: { id?: string; tenant_id?: string; code: string; vendor_id: string; location_id: string; order_date?: string; status?: string; notes?: string | null; created_at?: string }
+        Update: { id?: string; tenant_id?: string; code?: string; vendor_id?: string; location_id?: string; order_date?: string; status?: string; notes?: string | null; created_at?: string }
+        Relationships: []
+      }
+      purchase_lines: {
+        Row: { id: string; tenant_id: string; po_id: string; material_id: string; qty_ordered: number; unit_price: number; qty_received: number; created_at: string }
+        Insert: { id?: string; tenant_id: string; po_id: string; material_id: string; qty_ordered: number; unit_price?: number; qty_received?: number; created_at?: string }
+        Update: { id?: string; tenant_id?: string; po_id?: string; material_id?: string; qty_ordered?: number; unit_price?: number; qty_received?: number; created_at?: string }
+        Relationships: []
+      }
+      bom_lines: {
+        Row: { id: string; tenant_id: string; style_id: string; material_id: string; qty_per_unit: number; created_at: string }
+        Insert: { id?: string; tenant_id?: string; style_id: string; material_id: string; qty_per_unit: number; created_at?: string }
+        Update: { id?: string; tenant_id?: string; style_id?: string; material_id?: string; qty_per_unit?: number; created_at?: string }
+        Relationships: []
+      }
       returns: {
         Row: { id: string; tenant_id: string; code: string; order_id: string; return_date: string; reason: string | null; notes: string | null; created_at: string }
         Insert: { id?: string; tenant_id?: string; code: string; order_id: string; return_date?: string; reason?: string | null; notes?: string | null; created_at?: string }
@@ -156,6 +180,14 @@ export type Database = {
         Row: { sku_id: string | null; location_id: string | null; tenant_id: string | null; balance: number | null }
         Relationships: []
       }
+      material_balances_by_location: {
+        Row: { material_id: string | null; location_id: string | null; tenant_id: string | null; balance: number | null }
+        Relationships: []
+      }
+      material_balances: {
+        Row: { material_id: string | null; tenant_id: string | null; balance: number | null }
+        Relationships: []
+      }
       sku_hpp: {
         Row: { tenant_id: string | null; sku_id: string | null; hpp: number | null; costed_units: number | null }
         Relationships: []
@@ -171,6 +203,10 @@ export type Database = {
       }
       record_movement: {
         Args: { p_sku_id: string; p_qty: number; p_movement_type: string; p_reason?: string; p_ref_type?: string; p_ref_id?: string; p_location_id?: string }
+        Returns: string
+      }
+      record_material_movement: {
+        Args: { p_material_id: string; p_qty: number; p_movement_type: string; p_reason?: string; p_ref_type?: string; p_ref_id?: string; p_location_id?: string }
         Returns: string
       }
       record_transfer: {
@@ -192,6 +228,18 @@ export type Database = {
       create_return: {
         Args: { p_order_id: string; p_return_date?: string | null; p_reason: string; p_notes: string; p_lines: Json }
         Returns: string
+      }
+      create_purchase_order: {
+        Args: { p_vendor_id: string; p_location_id?: string | null; p_order_date?: string | null; p_notes: string; p_lines: Json }
+        Returns: string
+      }
+      receive_purchase: {
+        Args: { p_po_id: string; p_receipts: Json }
+        Returns: undefined
+      }
+      issue_material_to_po: {
+        Args: { p_prod_po_id: string; p_issues: Json; p_location_id?: string | null }
+        Returns: undefined
       }
     }
     Enums: { [_ in never]: never }

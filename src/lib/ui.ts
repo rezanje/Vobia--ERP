@@ -17,6 +17,14 @@ export const MOVEMENT_META: Record<string, { label: string; c: string; bg: strin
   transfer_in: { label: 'Transfer Masuk', c: '#9fc0e8', bg: 'rgba(159,192,232,.13)' },
 }
 
+export const MATERIAL_MOVEMENT_META: Record<string, { label: string; c: string; bg: string }> = {
+  purchase_in: { label: 'Pembelian Masuk', c: '#93d6a1', bg: 'rgba(147,214,161,.13)' },
+  issue_out: { label: 'Keluar ke Vendor', c: '#eda06a', bg: 'rgba(237,160,106,.13)' },
+  adjustment: { label: 'Penyesuaian', c: '#cdc6b8', bg: 'rgba(205,198,184,.13)' },
+  transfer_in: { label: 'Transfer Masuk', c: '#9fc0e8', bg: 'rgba(159,192,232,.13)' },
+  transfer_out: { label: 'Transfer Keluar', c: '#eda06a', bg: 'rgba(237,160,106,.13)' },
+}
+
 export const COST_LABELS: Record<string, string> = {
   material: 'Material',
   cmt: 'CMT (Jahit)',
