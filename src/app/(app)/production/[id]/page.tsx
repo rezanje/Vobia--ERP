@@ -4,6 +4,8 @@ import { createClient } from '@/lib/supabase/server'
 import StageButtons from './StageButtons'
 import ProdLineRow from './ProdLineRow'
 import CostForm from './CostForm'
+import IssueSection from './IssueSection'
+import { suggestIssue } from '@/lib/bom/suggest'
 import { COST_LABELS, rp } from '@/lib/ui'
 
 export default async function ProductionDetail({ params }: { params: Promise<{ id: string }> }) {
@@ -20,6 +22,17 @@ export default async function ProductionDetail({ params }: { params: Promise<{ i
 
   const { data: costs } = await supabase.from('cost_entries').select('id, cost_type, amount, note').eq('po_id', id)
   const totalCost = (costs ?? []).reduce((s, c) => s + Number(c.amount), 0)
+
+  const { data: bomRows } = await supabase.from('bom_lines').select('material_id, qty_per_unit').eq('style_id', po.style_id)
+  const bomMatIds = (bomRows ?? []).map((b) => b.material_id)
+  const { data: bomMaterials } = await supabase.from('materials').select('id, code').in('id', bomMatIds.length ? bomMatIds : ['00000000-0000-0000-0000-000000000000'])
+  const { data: issueLocations } = await supabase.from('locations').select('id, name').eq('active', true).order('name')
+  const bomCodeOf = new Map((bomMaterials ?? []).map((m) => [m.id, m.code]))
+  const totalUnits = (lines ?? []).reduce((s, l) => s + Number(l.qty_ordered), 0)
+  const suggestions = suggestIssue(
+    (bomRows ?? []).map((b) => ({ material_id: b.material_id, qty_per_unit: Number(b.qty_per_unit) })),
+    totalUnits,
+  ).map((s) => ({ material_id: s.material_id, material_code: bomCodeOf.get(s.material_id) ?? s.material_id, qty: s.qty }))
 
   return (
     <div>
@@ -68,6 +81,8 @@ export default async function ProductionDetail({ params }: { params: Promise<{ i
         </div>
         <CostForm poId={po.id} />
       </div>
+
+      <IssueSection prodPoId={po.id} suggestions={suggestions} locations={issueLocations ?? []} />
     </div>
   )
 }
