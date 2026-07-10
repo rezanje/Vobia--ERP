@@ -76,7 +76,7 @@ begin
     v_qty := (v_rec ->> 'qty')::numeric;
     if v_qty <= 0 then raise exception 'receipt qty must be > 0'; end if;
     select * into v_line from public.purchase_lines
-      where id = (v_rec ->> 'line_id')::uuid and po_id = p_po_id and tenant_id = v_tenant;
+      where id = (v_rec ->> 'line_id')::uuid and po_id = p_po_id and tenant_id = v_tenant for update;
     if v_line.id is null then raise exception 'line not in PO'; end if;
     if v_line.qty_received + v_qty > v_line.qty_ordered then
       raise exception 'over-receipt on line %: % + % > %', v_line.id, v_line.qty_received, v_qty, v_line.qty_ordered;
