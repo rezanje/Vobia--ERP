@@ -148,6 +148,12 @@ export type Database = {
         Update: { id?: string; tenant_id?: string; po_id?: string; material_id?: string; qty_ordered?: number; unit_price?: number; qty_received?: number; created_at?: string }
         Relationships: []
       }
+      bom_lines: {
+        Row: { id: string; tenant_id: string; style_id: string; material_id: string; qty_per_unit: number; created_at: string }
+        Insert: { id?: string; tenant_id?: string; style_id: string; material_id: string; qty_per_unit: number; created_at?: string }
+        Update: { id?: string; tenant_id?: string; style_id?: string; material_id?: string; qty_per_unit?: number; created_at?: string }
+        Relationships: []
+      }
       returns: {
         Row: { id: string; tenant_id: string; code: string; order_id: string; return_date: string; reason: string | null; notes: string | null; created_at: string }
         Insert: { id?: string; tenant_id?: string; code: string; order_id: string; return_date?: string; reason?: string | null; notes?: string | null; created_at?: string }
