@@ -223,6 +223,14 @@ export type Database = {
         Args: { p_order_id: string; p_return_date?: string | null; p_reason: string; p_notes: string; p_lines: Json }
         Returns: string
       }
+      create_purchase_order: {
+        Args: { p_vendor_id: string; p_location_id?: string | null; p_order_date?: string | null; p_notes: string; p_lines: Json }
+        Returns: string
+      }
+      receive_purchase: {
+        Args: { p_po_id: string; p_receipts: Json }
+        Returns: undefined
+      }
     }
     Enums: { [_ in never]: never }
     CompositeTypes: { [_ in never]: never }
