@@ -136,6 +136,18 @@ export type Database = {
         Update: { id?: string; tenant_id?: string; order_id?: string; sku_id?: string; qty?: number; unit_price?: number; created_at?: string }
         Relationships: []
       }
+      purchase_orders: {
+        Row: { id: string; tenant_id: string; code: string; vendor_id: string; location_id: string; order_date: string; status: string; notes: string | null; created_at: string }
+        Insert: { id?: string; tenant_id?: string; code: string; vendor_id: string; location_id: string; order_date?: string; status?: string; notes?: string | null; created_at?: string }
+        Update: { id?: string; tenant_id?: string; code?: string; vendor_id?: string; location_id?: string; order_date?: string; status?: string; notes?: string | null; created_at?: string }
+        Relationships: []
+      }
+      purchase_lines: {
+        Row: { id: string; tenant_id: string; po_id: string; material_id: string; qty_ordered: number; unit_price: number; qty_received: number; created_at: string }
+        Insert: { id?: string; tenant_id: string; po_id: string; material_id: string; qty_ordered: number; unit_price?: number; qty_received?: number; created_at?: string }
+        Update: { id?: string; tenant_id?: string; po_id?: string; material_id?: string; qty_ordered?: number; unit_price?: number; qty_received?: number; created_at?: string }
+        Relationships: []
+      }
       returns: {
         Row: { id: string; tenant_id: string; code: string; order_id: string; return_date: string; reason: string | null; notes: string | null; created_at: string }
         Insert: { id?: string; tenant_id?: string; code: string; order_id: string; return_date?: string; reason?: string | null; notes?: string | null; created_at?: string }
