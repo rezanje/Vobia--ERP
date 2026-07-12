@@ -1,6 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import { logout } from '@/app/auth/actions'
 
 const GROUPS: { title?: string; items: { label: string; href: string }[] }[] = [
@@ -12,22 +13,57 @@ const GROUPS: { title?: string; items: { label: string; href: string }[] }[] = [
   { title: 'Pengaturan', items: [{ label: 'Lokasi', href: '/locations' }] },
 ]
 
+const STORE_KEY = 'vb-nav-collapsed'
+
 export default function SideNav() {
   const path = usePathname()
   const active = (href: string) => (href === '/' ? path === '/' : path.startsWith(href))
+  // set of collapsed group titles; empty = all open. Loaded from localStorage after mount
+  // (not during render) to avoid an SSR/client hydration mismatch.
+  const [collapsed, setCollapsed] = useState<Set<string>>(new Set())
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(STORE_KEY)
+      if (raw) setCollapsed(new Set(JSON.parse(raw)))
+    } catch { /* ignore corrupt/absent storage */ }
+  }, [])
+
+  const toggle = (title: string) => setCollapsed((prev) => {
+    const next = new Set(prev)
+    next.has(title) ? next.delete(title) : next.add(title)
+    try { localStorage.setItem(STORE_KEY, JSON.stringify([...next])) } catch { /* ignore */ }
+    return next
+  })
+
   return (
     <aside className="vb-side">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src="/vobia-logo-white.png" alt="Vobia" className="vb-logo" />
       <nav className="vb-nav">
-        {GROUPS.map((g, i) => (
-          <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            {g.title && <div className="vb-navgroup-title">{g.title}</div>}
-            {g.items.map((it) => (
-              <Link key={it.href} href={it.href} className={`vb-navitem${active(it.href) ? ' on' : ''}`}>{it.label}</Link>
-            ))}
-          </div>
-        ))}
+        {GROUPS.map((g, i) => {
+          // the group holding the current page always shows, even if the user collapsed it
+          const hasActive = g.items.some((it) => active(it.href))
+          const open = !g.title || hasActive || !collapsed.has(g.title)
+          return (
+            <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              {g.title && (
+                <button
+                  type="button"
+                  className="vb-navgroup-title"
+                  onClick={() => toggle(g.title!)}
+                  aria-expanded={open}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', background: 'none', border: 'none', font: 'inherit', color: 'inherit', cursor: 'pointer', textAlign: 'left' }}
+                >
+                  {g.title}
+                  <span aria-hidden style={{ transition: 'transform .15s', transform: open ? 'rotate(90deg)' : 'none', fontSize: 9, opacity: 0.6 }}>▶</span>
+                </button>
+              )}
+              {open && g.items.map((it) => (
+                <Link key={it.href} href={it.href} className={`vb-navitem${active(it.href) ? ' on' : ''}`}>{it.label}</Link>
+              ))}
+            </div>
+          )
+        })}
       </nav>
       <div className="vb-sidefoot">
         <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--vb-accent)' }} />
