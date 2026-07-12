@@ -50,6 +50,8 @@ begin
   select k.id into v_sku from public.skus k join public.colorways c on c.id = k.colorway_id where c.style_id = v_style limit 1;
   v_prod := public.create_production_order(v_style, v_vendor, null, 'cmt',
     jsonb_build_array(jsonb_build_object('sku_id', v_sku, 'qty_ordered', 10)));
+  -- new orders start as draft; issuing material requires an approved order
+  update public.production_orders set doc_status = 'approved' where id = v_prod;
 
   -- stock the material first
   perform public.record_material_movement(v_mat, 50, 'purchase_in', null, null, null, v_loc);

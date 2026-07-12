@@ -22,8 +22,8 @@ begin
 
   insert into public.vendors (tenant_id, name) values (v_tenant, 'MyVend') returning id into v_vendor;
   select id into v_loc from public.locations where tenant_id = v_tenant and is_default;
-  insert into public.purchase_orders (tenant_id, code, vendor_id, location_id)
-    values (v_tenant, 'PB-TEST01', v_vendor, v_loc) returning id into v_po;
+  insert into public.purchase_orders (tenant_id, code, vendor_id, location_id, doc_status)
+    values (v_tenant, 'PB-TEST01', v_vendor, v_loc, 'approved') returning id into v_po;
   insert into public.materials (tenant_id, code, name, category, uom)
     values (v_tenant,'FAB-P','Kain','fabric','m') returning id into v_mat;
   insert into public.purchase_lines (tenant_id, po_id, material_id, qty_ordered, unit_price)
@@ -54,6 +54,8 @@ begin
 
   v_po := public.create_purchase_order(v_vendor, v_loc, current_date, 'test PO',
     jsonb_build_array(jsonb_build_object('material_id', v_mat, 'qty_ordered', 100, 'unit_price', 15000)));
+  -- new POs start as draft; receiving requires an approved PO
+  update public.purchase_orders set doc_status = 'approved' where id = v_po;
   select id into v_line from public.purchase_lines where po_id = v_po;
 
   -- partial receive 40 → material_in 40, qty_received 40, status still open
