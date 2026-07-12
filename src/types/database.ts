@@ -241,6 +241,10 @@ export type Database = {
         Args: { p_prod_po_id: string; p_issues: Json; p_location_id?: string | null }
         Returns: undefined
       }
+      approve_document: {
+        Args: { p_kind: string; p_id: string }
+        Returns: undefined
+      }
     }
     Enums: { [_ in never]: never }
     CompositeTypes: { [_ in never]: never }

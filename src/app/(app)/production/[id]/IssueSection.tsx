@@ -6,7 +6,7 @@ import { issueMaterialToPo } from '@/lib/production/issue'
 type Suggestion = { material_id: string; material_code: string; qty: number }
 type LocOption = { id: string; name: string }
 
-export default function IssueSection({ prodPoId, suggestions, locations }: { prodPoId: string; suggestions: Suggestion[]; locations: LocOption[] }) {
+export default function IssueSection({ prodPoId, suggestions, locations, disabled }: { prodPoId: string; suggestions: Suggestion[]; locations: LocOption[]; disabled?: boolean }) {
   const router = useRouter()
   const [locId, setLocId] = useState('')
   const [qtys, setQtys] = useState<Record<string, string>>(
@@ -36,6 +36,17 @@ export default function IssueSection({ prodPoId, suggestions, locations }: { pro
   return (
     <div className="vb-card" style={{ overflow: 'hidden', marginTop: 12 }}>
       <div className="vb-cardtitle" style={{ padding: '14px 16px 10px' }}>Issue Bahan ke Vendor (CMT)</div>
+      {disabled ? (
+        <div className="vb-empty">ACC order dulu sebelum keluarin bahan.</div>
+      ) : (
+        <IssueBody />
+      )}
+    </div>
+  )
+
+  function IssueBody() {
+    return (
+      <>
       {error && <div className="vb-danger" style={{ margin: '0 16px 8px', fontSize: 12.5 }}>{error}</div>}
       {!suggestions.length ? (
         <div className="vb-empty">Style ini belum punya BOM — tambah di halaman style bila CMT.</div>
@@ -63,6 +74,7 @@ export default function IssueSection({ prodPoId, suggestions, locations }: { pro
           </div>
         </>
       )}
-    </div>
-  )
+      </>
+    )
+  }
 }

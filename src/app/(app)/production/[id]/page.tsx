@@ -7,6 +7,8 @@ import CostForm from './CostForm'
 import IssueSection from './IssueSection'
 import { suggestIssue } from '@/lib/bom/suggest'
 import { COST_LABELS, rp } from '@/lib/ui'
+import { DocBadge, DocActions } from '@/components/DocApproval'
+import { getRole, canApprove } from '@/lib/auth/role'
 
 export default async function ProductionDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -14,6 +16,8 @@ export default async function ProductionDetail({ params }: { params: Promise<{ i
 
   const { data: po } = await supabase.from('production_orders').select('*').eq('id', id).single()
   if (!po) notFound()
+  const role = await getRole()
+  const approved = po.doc_status === 'approved'
 
   const { data: lines } = await supabase.from('prod_lines').select('id, sku_id, qty_ordered, qty_received, reject_count').eq('po_id', id)
   const skuIds = (lines ?? []).map((l) => l.sku_id)
@@ -37,9 +41,12 @@ export default async function ProductionDetail({ params }: { params: Promise<{ i
   return (
     <div>
       <Link href="/production" className="vb-back">← Produksi</Link>
-      <div style={{ marginBottom: 16 }}>
-        <h1 className="vb-h1">{po.code}</h1>
-        <div className="vb-sub">{po.deadline ? `Deadline ${po.deadline}` : 'Tanpa deadline'}{po.notes ? ` · ${po.notes}` : ''}</div>
+      <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16 }}>
+        <div>
+          <h1 className="vb-h1">{po.code}<DocBadge approved={approved} /></h1>
+          <div className="vb-sub">{po.deadline ? `Deadline ${po.deadline}` : 'Tanpa deadline'}{po.notes ? ` · ${po.notes}` : ''}</div>
+        </div>
+        <DocActions kind="production" id={po.id} approved={approved} canApprove={canApprove(role)} suratHref={`/production/${po.id}/surat`} />
       </div>
 
       <StageButtons poId={po.id} stage={po.stage} />
@@ -82,7 +89,7 @@ export default async function ProductionDetail({ params }: { params: Promise<{ i
         <CostForm poId={po.id} />
       </div>
 
-      <IssueSection prodPoId={po.id} suggestions={suggestions} locations={issueLocations ?? []} />
+      <IssueSection prodPoId={po.id} suggestions={suggestions} locations={issueLocations ?? []} disabled={!approved} />
     </div>
   )
 }
