@@ -166,6 +166,24 @@ export type Database = {
         Update: { id?: string; tenant_id?: string; return_id?: string; sku_id?: string; qty?: number; created_at?: string }
         Relationships: []
       }
+      accounts: {
+        Row: { id: string; tenant_id: string; code: string; name: string; type: string; normal_balance: string; is_contra: boolean; active: boolean; created_at: string }
+        Insert: { id?: string; tenant_id?: string; code: string; name: string; type: string; normal_balance: string; is_contra?: boolean; active?: boolean; created_at?: string }
+        Update: { id?: string; tenant_id?: string; code?: string; name?: string; type?: string; normal_balance?: string; is_contra?: boolean; active?: boolean; created_at?: string }
+        Relationships: []
+      }
+      journals: {
+        Row: { id: string; tenant_id: string; journal_date: string; memo: string | null; source_type: string | null; source_id: string | null; created_by: string | null; created_at: string }
+        Insert: { id?: string; tenant_id: string; journal_date?: string; memo?: string | null; source_type?: string | null; source_id?: string | null; created_by?: string | null; created_at?: string }
+        Update: { id?: string; tenant_id?: string; journal_date?: string; memo?: string | null; source_type?: string | null; source_id?: string | null; created_by?: string | null; created_at?: string }
+        Relationships: []
+      }
+      journal_lines: {
+        Row: { id: string; tenant_id: string; journal_id: string; account_id: string; debit: number; credit: number; memo: string | null; created_at: string }
+        Insert: { id?: string; tenant_id: string; journal_id: string; account_id: string; debit?: number; credit?: number; memo?: string | null; created_at?: string }
+        Update: { id?: string; tenant_id?: string; journal_id?: string; account_id?: string; debit?: number; credit?: number; memo?: string | null; created_at?: string }
+        Relationships: []
+      }
     }
     Views: {
       style_summary: {
@@ -190,6 +208,14 @@ export type Database = {
       }
       sku_hpp: {
         Row: { tenant_id: string | null; sku_id: string | null; hpp: number | null; costed_units: number | null }
+        Relationships: []
+      }
+      account_balances: {
+        Row: { tenant_id: string | null; account_id: string | null; account_code: string | null; account_name: string | null; account_type: string | null; normal_balance: string | null; is_contra: boolean | null; total_debit: number | null; total_credit: number | null; balance: number | null }
+        Relationships: []
+      }
+      ledger_entries: {
+        Row: { tenant_id: string | null; journal_id: string | null; journal_date: string | null; journal_memo: string | null; source_type: string | null; account_id: string | null; account_code: string | null; account_name: string | null; account_type: string | null; normal_balance: string | null; is_contra: boolean | null; debit: number | null; credit: number | null; line_memo: string | null }
         Relationships: []
       }
     }
@@ -244,6 +270,14 @@ export type Database = {
       approve_document: {
         Args: { p_kind: string; p_id: string }
         Returns: undefined
+      }
+      post_journal: {
+        Args: { p_date: string | null; p_memo: string | null; p_source_type: string | null; p_source_id: string | null; p_lines: Json }
+        Returns: string
+      }
+      post_opening_balance: {
+        Args: Record<string, never>
+        Returns: string
       }
     }
     Enums: { [_ in never]: never }
