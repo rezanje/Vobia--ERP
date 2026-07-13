@@ -184,6 +184,36 @@ export type Database = {
         Update: { id?: string; tenant_id?: string; journal_id?: string; account_id?: string; debit?: number; credit?: number; memo?: string | null; created_at?: string }
         Relationships: []
       }
+      employees: {
+        Row: { id: string; tenant_id: string; name: string; position: string | null; placement: string | null; join_date: string | null; base_salary: number; bank_account: string | null; active: boolean; created_at: string }
+        Insert: { id?: string; tenant_id?: string; name: string; position?: string | null; placement?: string | null; join_date?: string | null; base_salary?: number; bank_account?: string | null; active?: boolean; created_at?: string }
+        Update: { id?: string; tenant_id?: string; name?: string; position?: string | null; placement?: string | null; join_date?: string | null; base_salary?: number; bank_account?: string | null; active?: boolean; created_at?: string }
+        Relationships: []
+      }
+      pay_components: {
+        Row: { id: string; tenant_id: string; name: string; kind: string; calc: string; value: number; is_tax: boolean; active: boolean; created_at: string }
+        Insert: { id?: string; tenant_id?: string; name: string; kind: string; calc: string; value?: number; is_tax?: boolean; active?: boolean; created_at?: string }
+        Update: { id?: string; tenant_id?: string; name?: string; kind?: string; calc?: string; value?: number; is_tax?: boolean; active?: boolean; created_at?: string }
+        Relationships: []
+      }
+      payroll_runs: {
+        Row: { id: string; tenant_id: string; period: string; status: string; journal_id: string | null; posted_at: string | null; created_at: string }
+        Insert: { id?: string; tenant_id: string; period: string; status?: string; journal_id?: string | null; posted_at?: string | null; created_at?: string }
+        Update: { id?: string; tenant_id?: string; period?: string; status?: string; journal_id?: string | null; posted_at?: string | null; created_at?: string }
+        Relationships: []
+      }
+      payslips: {
+        Row: { id: string; tenant_id: string; run_id: string; employee_id: string; base_salary: number; tunjangan_total: number; overtime: number; deduction_total: number; tax_total: number; gross: number; net: number; created_at: string }
+        Insert: { id?: string; tenant_id: string; run_id: string; employee_id: string; base_salary?: number; tunjangan_total?: number; overtime?: number; deduction_total?: number; tax_total?: number; created_at?: string }
+        Update: { id?: string; tenant_id?: string; run_id?: string; employee_id?: string; base_salary?: number; tunjangan_total?: number; overtime?: number; deduction_total?: number; tax_total?: number; created_at?: string }
+        Relationships: []
+      }
+      payslip_lines: {
+        Row: { id: string; tenant_id: string; payslip_id: string; label: string; kind: string; amount: number; created_at: string }
+        Insert: { id?: string; tenant_id: string; payslip_id: string; label: string; kind: string; amount: number; created_at?: string }
+        Update: { id?: string; tenant_id?: string; payslip_id?: string; label?: string; kind?: string; amount?: number; created_at?: string }
+        Relationships: []
+      }
     }
     Views: {
       style_summary: {
@@ -277,6 +307,14 @@ export type Database = {
       }
       post_opening_balance: {
         Args: Record<string, never>
+        Returns: string
+      }
+      generate_payroll: {
+        Args: { p_period: string }
+        Returns: string
+      }
+      post_payroll: {
+        Args: { p_run_id: string }
         Returns: string
       }
     }
