@@ -61,14 +61,14 @@ export default function IssueForm({
         notes: r.notes.trim() || undefined,
       }
       if (r.po_type === 'material' && r.material_id) {
-        child.material_id = r.material_id
-        if (r.qty) {
-          const qty = Number(r.qty)
-          if (!Number.isFinite(qty) || qty <= 0) { setError('Qty bahan harus > 0'); return }
+        const qty = r.qty ? Number(r.qty) : NaN
+        // Partial material selection (material picked but qty blank/zero/invalid) is treated
+        // as "no material line" — detail is entered later in /purchasing — so we only attach
+        // material fields when qty is a valid number > 0. Otherwise the child is sent plain.
+        if (Number.isFinite(qty) && qty > 0) {
+          child.material_id = r.material_id
           child.qty = qty
-        }
-        if (r.unit_price) {
-          const price = Number(r.unit_price)
+          const price = r.unit_price ? Number(r.unit_price) : 0
           if (!Number.isFinite(price) || price < 0) { setError('Harga bahan harus angka ≥ 0'); return }
           child.unit_price = price
         }
