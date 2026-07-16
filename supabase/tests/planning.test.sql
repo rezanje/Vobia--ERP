@@ -15,7 +15,7 @@ declare
   v_cnt int;
 begin
   perform set_config('request.jwt.claims',
-    json_build_object('sub','a7777777-7777-7777-7777-777777777777','role','authenticated','tenant_id',v_tenant::text)::text, true);
+    json_build_object('sub','a7777777-7777-7777-7777-777777777777','role','authenticated','tenant_id',v_tenant::text,'user_role','owner')::text, true);
   perform set_config('role','authenticated', true);
 
   insert into public.styles (tenant_id, code, name) values (v_tenant, 'TST-01', 'Test Style') returning id into v_style;

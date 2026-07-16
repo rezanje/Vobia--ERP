@@ -17,10 +17,10 @@ declare
 begin
   if v_tenant is null then raise exception 'no tenant_id in JWT'; end if;
   if p_kind not in ('sales','ops') then raise exception 'kind must be sales|ops'; end if;
-  if p_kind = 'sales' and v_role not in ('owner','sales') then
+  if p_kind = 'sales' and coalesce(v_role not in ('owner','sales'), true) then
     raise exception 'hanya role Sales/Owner yang boleh input forecast Sales';
   end if;
-  if p_kind = 'ops' and v_role not in ('owner','ops') then
+  if p_kind = 'ops' and coalesce(v_role not in ('owner','ops'), true) then
     raise exception 'hanya role Ops/Owner yang boleh input forecast Operasional';
   end if;
   if p_period !~ '^\d{4}-Q[1-4]$' then raise exception 'period must be YYYY-Qn'; end if;
@@ -60,7 +60,7 @@ declare
   v_line jsonb;
 begin
   if v_tenant is null then raise exception 'no tenant_id in JWT'; end if;
-  if v_role not in ('owner','ops') then raise exception 'hanya role Ops/Owner yang boleh membuat proyeksi'; end if;
+  if coalesce(v_role not in ('owner','ops'), true) then raise exception 'hanya role Ops/Owner yang boleh membuat proyeksi'; end if;
   if p_period !~ '^\d{4}-Q[1-4]$' then raise exception 'period must be YYYY-Qn'; end if;
   if p_lines is null or jsonb_array_length(p_lines) < 1 then raise exception 'at least one line required'; end if;
 
@@ -93,7 +93,7 @@ declare
   v_status text;
 begin
   if v_tenant is null then raise exception 'no tenant_id in JWT'; end if;
-  if v_role not in ('owner','ops') then raise exception 'hanya role Ops/Owner yang boleh mengunci proyeksi'; end if;
+  if coalesce(v_role not in ('owner','ops'), true) then raise exception 'hanya role Ops/Owner yang boleh mengunci proyeksi'; end if;
   select status into v_status from public.projections where id = p_id and tenant_id = v_tenant for update;
   if v_status is null then raise exception 'projection not found'; end if;
   if v_status = 'locked' then raise exception 'already locked'; end if;
@@ -117,7 +117,7 @@ declare
   v_line jsonb;
 begin
   if v_tenant is null then raise exception 'no tenant_id in JWT'; end if;
-  if v_role not in ('owner','ops') then raise exception 'hanya role Ops/Owner yang boleh membuat PCB'; end if;
+  if coalesce(v_role not in ('owner','ops'), true) then raise exception 'hanya role Ops/Owner yang boleh membuat PCB'; end if;
   if p_quarter !~ '^\d{4}-Q[1-4]$' then raise exception 'quarter must be YYYY-Qn'; end if;
   if not exists (select 1 from public.projections
                   where id = p_projection_id and tenant_id = v_tenant and status = 'locked') then
@@ -154,7 +154,7 @@ declare
   v_id uuid;
 begin
   if v_tenant is null then raise exception 'no tenant_id in JWT'; end if;
-  if v_role not in ('owner','ops') then raise exception 'hanya role Ops/Owner yang boleh membuat PPO'; end if;
+  if coalesce(v_role not in ('owner','ops'), true) then raise exception 'hanya role Ops/Owner yang boleh membuat PPO'; end if;
   if p_scheme not in ('fob','cmt') then raise exception 'scheme must be fob|cmt'; end if;
   if p_qty is null or p_qty <= 0 then raise exception 'qty must be > 0'; end if;
   if not exists (select 1 from public.pcb where id = p_pcb_id and tenant_id = v_tenant) then
@@ -188,7 +188,7 @@ declare
   v_n int;
 begin
   if v_tenant is null then raise exception 'no tenant_id in JWT'; end if;
-  if v_role not in ('owner','ops') then raise exception 'hanya role Ops/Owner yang boleh menerbitkan PO dari PPO'; end if;
+  if coalesce(v_role not in ('owner','ops'), true) then raise exception 'hanya role Ops/Owner yang boleh menerbitkan PO dari PPO'; end if;
   select * into v_ppo from public.ppo where id = p_ppo_id and tenant_id = v_tenant for update;
   if v_ppo.id is null then raise exception 'ppo not found'; end if;
   if v_ppo.status <> 'draft' then raise exception 'ppo already issued'; end if;
