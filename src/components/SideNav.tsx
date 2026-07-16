@@ -4,10 +4,17 @@ import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { logout } from '@/app/auth/actions'
 
-const GROUPS: { title?: string; items: { label: string; href: string }[] }[] = [
+const GROUPS: { title?: string; items: { label: string; href: string; roles?: string[] }[] }[] = [
   { items: [{ label: 'Dashboard', href: '/' }] },
-  { title: 'Perencanaan', items: [{ label: 'Forecast', href: '/forecasts' }, { label: 'Proyeksi', href: '/projections' }, { label: 'Produk Baru', href: '/new-products' }] },
-  { title: 'PPIC', items: [{ label: 'PCB', href: '/pcb' }, { label: 'PPO', href: '/ppo' }] },
+  { title: 'Perencanaan', items: [
+      { label: 'Forecast', href: '/forecasts', roles: ['owner', 'sales', 'ops'] },
+      { label: 'Proyeksi', href: '/projections', roles: ['owner', 'sales', 'ops'] },
+      { label: 'Produk Baru', href: '/new-products', roles: ['owner', 'sales', 'ops'] },
+    ] },
+  { title: 'PPIC', items: [
+      { label: 'PCB', href: '/pcb', roles: ['owner', 'ops'] },
+      { label: 'PPO', href: '/ppo', roles: ['owner', 'ops'] },
+    ] },
   { title: 'Produk', items: [{ label: 'Styles', href: '/styles' }, { label: 'Stok', href: '/stock' }, { label: 'Bahan', href: '/materials' }, { label: 'HPP', href: '/costing' }] },
   { title: 'Produksi', items: [{ label: 'Produksi', href: '/production' }, { label: 'Vendor', href: '/vendors' }] },
   { title: 'Penjualan', items: [{ label: 'Order', href: '/orders' }, { label: 'Channel', href: '/channels' }, { label: 'Retur', href: '/returns' }] },
@@ -19,7 +26,7 @@ const GROUPS: { title?: string; items: { label: string; href: string }[] }[] = [
 
 const STORE_KEY = 'vb-nav-collapsed'
 
-export default function SideNav() {
+export default function SideNav({ role }: { role: string | null }) {
   const path = usePathname()
   const active = (href: string) => (href === '/' ? path === '/' : path.startsWith(href))
   // set of collapsed group titles; empty = all open. Loaded from localStorage after mount
@@ -45,8 +52,10 @@ export default function SideNav() {
       <img src="/vobia-logo-white.png" alt="Vobia" className="vb-logo" />
       <nav className="vb-nav">
         {GROUPS.map((g, i) => {
+          const items = g.items.filter((it) => !it.roles || it.roles.includes(role ?? ''))
+          if (!items.length) return null
           // the group holding the current page always shows, even if the user collapsed it
-          const hasActive = g.items.some((it) => active(it.href))
+          const hasActive = items.some((it) => active(it.href))
           const open = !g.title || hasActive || !collapsed.has(g.title)
           return (
             <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -62,7 +71,7 @@ export default function SideNav() {
                   <span aria-hidden style={{ transition: 'transform .15s', transform: open ? 'rotate(90deg)' : 'none', fontSize: 9, opacity: 0.6 }}>▶</span>
                 </button>
               )}
-              {open && g.items.map((it) => (
+              {open && items.map((it) => (
                 <Link key={it.href} href={it.href} className={`vb-navitem${active(it.href) ? ' on' : ''}`}>{it.label}</Link>
               ))}
             </div>
