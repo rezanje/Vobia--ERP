@@ -101,9 +101,9 @@ export type Database = {
         Relationships: []
       }
       production_orders: {
-        Row: { id: string; tenant_id: string; code: string; style_id: string; vendor_id: string; stage: string; deadline: string | null; notes: string | null; created_at: string; doc_status: string; approved_by: string | null; approved_at: string | null }
-        Insert: { id?: string; tenant_id: string; code: string; style_id: string; vendor_id: string; stage?: string; deadline?: string | null; notes?: string | null; created_at?: string; doc_status?: string; approved_by?: string | null; approved_at?: string | null }
-        Update: { id?: string; tenant_id?: string; code?: string; style_id?: string; vendor_id?: string; stage?: string; deadline?: string | null; notes?: string | null; created_at?: string; doc_status?: string; approved_by?: string | null; approved_at?: string | null }
+        Row: { id: string; tenant_id: string; code: string; style_id: string; vendor_id: string; stage: string; deadline: string | null; notes: string | null; created_at: string; doc_status: string; approved_by: string | null; approved_at: string | null; ppo_id: string | null }
+        Insert: { id?: string; tenant_id: string; code: string; style_id: string; vendor_id: string; stage?: string; deadline?: string | null; notes?: string | null; created_at?: string; doc_status?: string; approved_by?: string | null; approved_at?: string | null; ppo_id?: string | null }
+        Update: { id?: string; tenant_id?: string; code?: string; style_id?: string; vendor_id?: string; stage?: string; deadline?: string | null; notes?: string | null; created_at?: string; doc_status?: string; approved_by?: string | null; approved_at?: string | null; ppo_id?: string | null }
         Relationships: []
       }
       prod_lines: {
@@ -137,9 +137,9 @@ export type Database = {
         Relationships: []
       }
       purchase_orders: {
-        Row: { id: string; tenant_id: string; code: string; vendor_id: string; location_id: string; order_date: string; status: string; notes: string | null; created_at: string; doc_status: string; approved_by: string | null; approved_at: string | null }
-        Insert: { id?: string; tenant_id?: string; code: string; vendor_id: string; location_id: string; order_date?: string; status?: string; notes?: string | null; created_at?: string; doc_status?: string; approved_by?: string | null; approved_at?: string | null }
-        Update: { id?: string; tenant_id?: string; code?: string; vendor_id?: string; location_id?: string; order_date?: string; status?: string; notes?: string | null; created_at?: string; doc_status?: string; approved_by?: string | null; approved_at?: string | null }
+        Row: { id: string; tenant_id: string; code: string; vendor_id: string; location_id: string; order_date: string; status: string; notes: string | null; created_at: string; doc_status: string; approved_by: string | null; approved_at: string | null; ppo_id: string | null; po_type: string; amount: number }
+        Insert: { id?: string; tenant_id?: string; code: string; vendor_id: string; location_id: string; order_date?: string; status?: string; notes?: string | null; created_at?: string; doc_status?: string; approved_by?: string | null; approved_at?: string | null; ppo_id?: string | null; po_type?: string; amount?: number }
+        Update: { id?: string; tenant_id?: string; code?: string; vendor_id?: string; location_id?: string; order_date?: string; status?: string; notes?: string | null; created_at?: string; doc_status?: string; approved_by?: string | null; approved_at?: string | null; ppo_id?: string | null; po_type?: string; amount?: number }
         Relationships: []
       }
       purchase_lines: {
@@ -212,6 +212,60 @@ export type Database = {
         Row: { id: string; tenant_id: string; payslip_id: string; label: string; kind: string; amount: number; created_at: string }
         Insert: { id?: string; tenant_id: string; payslip_id: string; label: string; kind: string; amount: number; created_at?: string }
         Update: { id?: string; tenant_id?: string; payslip_id?: string; label?: string; kind?: string; amount?: number; created_at?: string }
+        Relationships: []
+      }
+      forecasts: {
+        Row: { id: string; tenant_id: string; kind: string; period: string; notes: string | null; created_at: string }
+        Insert: { id?: string; tenant_id?: string; kind: string; period: string; notes?: string | null; created_at?: string }
+        Update: { id?: string; tenant_id?: string; kind?: string; period?: string; notes?: string | null; created_at?: string }
+        Relationships: []
+      }
+      forecast_lines: {
+        Row: { id: string; tenant_id: string; forecast_id: string; style_id: string; qty: number; ito: number | null; stock_ratio: number | null }
+        Insert: { id?: string; tenant_id: string; forecast_id: string; style_id: string; qty: number; ito?: number | null; stock_ratio?: number | null }
+        Update: { id?: string; tenant_id?: string; forecast_id?: string; style_id?: string; qty?: number; ito?: number | null; stock_ratio?: number | null }
+        Relationships: []
+      }
+      new_products: {
+        Row: { id: string; tenant_id: string; name: string; style_id: string | null; rnd_status: string; mkt_status: string; agreed_qty: number | null; notes: string | null; created_at: string }
+        Insert: { id?: string; tenant_id?: string; name: string; style_id?: string | null; rnd_status?: string; mkt_status?: string; agreed_qty?: number | null; notes?: string | null; created_at?: string }
+        Update: { id?: string; tenant_id?: string; name?: string; style_id?: string | null; rnd_status?: string; mkt_status?: string; agreed_qty?: number | null; notes?: string | null; created_at?: string }
+        Relationships: []
+      }
+      projections: {
+        Row: { id: string; tenant_id: string; period: string; status: string; locked_at: string | null; created_at: string }
+        Insert: { id?: string; tenant_id?: string; period: string; status?: string; locked_at?: string | null; created_at?: string }
+        Update: { id?: string; tenant_id?: string; period?: string; status?: string; locked_at?: string | null; created_at?: string }
+        Relationships: []
+      }
+      projection_lines: {
+        Row: { id: string; tenant_id: string; projection_id: string; style_id: string; qty: number; kind: string; new_product_id: string | null }
+        Insert: { id?: string; tenant_id: string; projection_id: string; style_id: string; qty: number; kind?: string; new_product_id?: string | null }
+        Update: { id?: string; tenant_id?: string; projection_id?: string; style_id?: string; qty?: number; kind?: string; new_product_id?: string | null }
+        Relationships: []
+      }
+      pcb: {
+        Row: { id: string; tenant_id: string; code: string; quarter: string; projection_id: string; status: string; created_at: string }
+        Insert: { id?: string; tenant_id?: string; code: string; quarter: string; projection_id: string; status?: string; created_at?: string }
+        Update: { id?: string; tenant_id?: string; code?: string; quarter?: string; projection_id?: string; status?: string; created_at?: string }
+        Relationships: []
+      }
+      pcb_lines: {
+        Row: { id: string; tenant_id: string; pcb_id: string; style_id: string; target_sales: number; ending_stock: number; supply_qty: number; unit_cost: number; total: number }
+        Insert: { id?: string; tenant_id: string; pcb_id: string; style_id: string; target_sales: number; ending_stock?: number; unit_cost?: number }
+        Update: { id?: string; tenant_id?: string; pcb_id?: string; style_id?: string; target_sales?: number; ending_stock?: number; unit_cost?: number }
+        Relationships: []
+      }
+      ppo: {
+        Row: { id: string; tenant_id: string; code: string; pcb_id: string; style_id: string; scheme: string; qty: number; status: string; notes: string | null; created_at: string }
+        Insert: { id?: string; tenant_id?: string; code: string; pcb_id: string; style_id: string; scheme: string; qty: number; status?: string; notes?: string | null; created_at?: string }
+        Update: { id?: string; tenant_id?: string; code?: string; pcb_id?: string; style_id?: string; scheme?: string; qty?: number; status?: string; notes?: string | null; created_at?: string }
+        Relationships: []
+      }
+      po_payments: {
+        Row: { id: string; tenant_id: string; po_id: string; kind: string; amount: number; status: string; paid_at: string | null; created_at: string }
+        Insert: { id?: string; tenant_id?: string; po_id: string; kind: string; amount: number; status?: string; paid_at?: string | null; created_at?: string }
+        Update: { id?: string; tenant_id?: string; po_id?: string; kind?: string; amount?: number; status?: string; paid_at?: string | null; created_at?: string }
         Relationships: []
       }
     }
@@ -316,6 +370,30 @@ export type Database = {
       post_payroll: {
         Args: { p_run_id: string }
         Returns: string
+      }
+      create_forecast: {
+        Args: { p_kind: string; p_period: string; p_notes: string; p_lines: Json }
+        Returns: string
+      }
+      create_projection: {
+        Args: { p_period: string; p_lines: Json }
+        Returns: string
+      }
+      lock_projection: {
+        Args: { p_id: string }
+        Returns: undefined
+      }
+      create_pcb: {
+        Args: { p_projection_id: string; p_quarter: string; p_lines: Json }
+        Returns: string
+      }
+      create_ppo: {
+        Args: { p_pcb_id: string; p_style_id: string; p_scheme: string; p_qty: number; p_notes: string }
+        Returns: string
+      }
+      issue_ppo_pos: {
+        Args: { p_ppo_id: string; p_children: Json }
+        Returns: undefined
       }
     }
     Enums: { [_ in never]: never }
