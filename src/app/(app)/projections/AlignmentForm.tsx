@@ -6,7 +6,7 @@ type StyleOption = { id: string; code: string; name: string }
 type PeriodData = { period: string; salesByStyle: Record<string, number>; opsByStyle: Record<string, number> }
 type NewProductOption = { id: string; name: string; style_id: string; agreed_qty: number }
 
-export default function AlignmentForm({ periods, styles, newProducts }: { periods: PeriodData[]; styles: StyleOption[]; newProducts: NewProductOption[] }) {
+export default function AlignmentForm({ periods, styles, newProducts, canWrite }: { periods: PeriodData[]; styles: StyleOption[]; newProducts: NewProductOption[]; canWrite: boolean }) {
   const [period, setPeriod] = useState('')
   const [finalQty, setFinalQty] = useState<Record<string, string>>({})
   const [npChecked, setNpChecked] = useState<Record<string, boolean>>({})
@@ -116,9 +116,13 @@ export default function AlignmentForm({ periods, styles, newProducts }: { period
             </div>
           )}
 
-          <button className="vb-btn" type="button" disabled={saving} onClick={onSave}>
-            {saving ? 'Menyimpan…' : 'Buat Proyeksi'}
-          </button>
+          {canWrite ? (
+            <button className="vb-btn" type="button" disabled={saving} onClick={onSave}>
+              {saving ? 'Menyimpan…' : 'Buat Proyeksi'}
+            </button>
+          ) : (
+            <div className="vb-muted" style={{ fontSize: 12.5 }}>Hanya tim Ops/Owner yang bisa membuat proyeksi. Anda bisa melihat perbandingan Sales vs Ops di atas.</div>
+          )}
         </>
       )}
     </div>

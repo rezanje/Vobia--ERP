@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { getRole, canWritePpic } from '@/lib/auth/role'
 import AlignmentForm from './AlignmentForm'
 
 const STATUS_META: Record<string, { label: string; c: string; bg: string }> = {
@@ -9,6 +10,7 @@ const STATUS_META: Record<string, { label: string; c: string; bg: string }> = {
 
 export default async function ProjectionsPage() {
   const supabase = await createClient()
+  const canWrite = canWritePpic(await getRole())
   const { data: projections } = await supabase
     .from('projections')
     .select('id, period, status, created_at')
@@ -74,7 +76,7 @@ export default async function ProjectionsPage() {
             )
           })}
         </div>
-        <AlignmentForm periods={periods} styles={styles ?? []} newProducts={newProducts} />
+        <AlignmentForm periods={periods} styles={styles ?? []} newProducts={newProducts} canWrite={canWrite} />
       </div>
     </div>
   )

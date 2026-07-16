@@ -8,8 +8,9 @@ type Row = { style_id: string; qty: string; ito: string; stock_ratio: string }
 const EMPTY_ROW: Row = { style_id: '', qty: '', ito: '', stock_ratio: '' }
 const PERIOD_RE = /^\d{4}-Q[1-4]$/
 
-export default function ForecastForm({ styles }: { styles: StyleOption[] }) {
-  const [kind, setKind] = useState<'sales' | 'ops'>('sales')
+export default function ForecastForm({ styles, role }: { styles: StyleOption[]; role: string | null }) {
+  const locked = role === 'sales' ? 'sales' : role === 'ops' ? 'ops' : null
+  const [kind, setKind] = useState<'sales' | 'ops'>(locked ?? 'sales')
   const [period, setPeriod] = useState('')
   const [notes, setNotes] = useState('')
   const [rows, setRows] = useState<Row[]>([{ ...EMPTY_ROW }])
@@ -42,7 +43,7 @@ export default function ForecastForm({ styles }: { styles: StyleOption[] }) {
     const res = await createForecast({ kind, period, notes: notes.trim(), lines })
     setSaving(false)
     if (res?.error) { setError(res.error); return }
-    setKind('sales'); setPeriod(''); setNotes(''); setRows([{ ...EMPTY_ROW }])
+    setKind(locked ?? 'sales'); setPeriod(''); setNotes(''); setRows([{ ...EMPTY_ROW }])
   }
 
   return (
@@ -52,10 +53,14 @@ export default function ForecastForm({ styles }: { styles: StyleOption[] }) {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 12 }}>
         <div>
           <label className="vb-label">Jenis</label>
-          <select className="vb-input" value={kind} onChange={(e) => setKind(e.target.value as 'sales' | 'ops')}>
-            <option value="sales">Sales</option>
-            <option value="ops">Operasional</option>
-          </select>
+          {locked ? (
+            <div className="vb-label" style={{ margin: 0, alignSelf: 'center' }}>{locked === 'sales' ? 'Sales' : 'Operasional'}</div>
+          ) : (
+            <select className="vb-input" value={kind} onChange={(e) => setKind(e.target.value as 'sales' | 'ops')}>
+              <option value="sales">Sales</option>
+              <option value="ops">Operasional</option>
+            </select>
+          )}
         </div>
         <div>
           <label className="vb-label">Periode</label>

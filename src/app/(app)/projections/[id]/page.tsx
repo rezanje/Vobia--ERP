@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { getRole, canWritePpic } from '@/lib/auth/role'
 import LockButton from './LockButton'
 
 const STATUS_META: Record<string, { label: string; c: string; bg: string }> = {
@@ -11,6 +12,7 @@ const STATUS_META: Record<string, { label: string; c: string; bg: string }> = {
 export default async function ProjectionDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const supabase = await createClient()
+  const canWrite = canWritePpic(await getRole())
 
   const { data: projection } = await supabase.from('projections').select('*').eq('id', id).single()
   if (!projection) notFound()
@@ -49,9 +51,11 @@ export default async function ProjectionDetail({ params }: { params: Promise<{ i
           <div className="vb-sub">{lines?.length ?? 0} baris · total qty {total}</div>
         </div>
         {projection.status === 'draft' ? (
-          <LockButton id={projection.id} />
-        ) : (
+          canWrite ? <LockButton id={projection.id} /> : <span className="vb-badge" style={{ background: 'rgba(227,196,110,.13)', color: '#e3c46e' }}>Menunggu dikunci Ops</span>
+        ) : canWrite ? (
           <Link href={`/pcb/new?projection=${projection.id}`} className="vb-btn">Buat PCB dari proyeksi ini →</Link>
+        ) : (
+          <span className="vb-muted" style={{ fontSize: 12.5 }}>Terkunci — PCB dibuat oleh tim Ops</span>
         )}
       </div>
       <div className="vb-card" style={{ overflow: 'hidden' }}>

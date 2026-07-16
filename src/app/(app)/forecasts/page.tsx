@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { getRole } from '@/lib/auth/role'
 import ForecastForm from './ForecastForm'
 
 const KIND_META: Record<string, { label: string; c: string; bg: string }> = {
@@ -8,6 +9,7 @@ const KIND_META: Record<string, { label: string; c: string; bg: string }> = {
 
 export default async function ForecastsPage() {
   const supabase = await createClient()
+  const role = await getRole()
   const { data: forecasts } = await supabase
     .from('forecasts')
     .select('id, kind, period, notes, created_at')
@@ -48,7 +50,7 @@ export default async function ForecastsPage() {
             )
           })}
         </div>
-        <ForecastForm styles={styles ?? []} />
+        <ForecastForm styles={styles ?? []} role={role} />
       </div>
     </div>
   )
