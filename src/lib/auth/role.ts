@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 
 // Current user's app role from their profile
-// (owner/ops/production/inventory/finance/viewer).
+// (owner/sales/ops/production/inventory/finance/viewer).
 export async function getRole(): Promise<string | null> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -11,3 +11,9 @@ export async function getRole(): Promise<string | null> {
 }
 
 export const canApprove = (role: string | null) => role === 'owner' || role === 'ops'
+
+// P1-P3 planning/PPIC role gates (Sales vs Ops demo simulation).
+export const canWriteSalesForecast = (role: string | null) => role === 'owner' || role === 'sales'
+export const canWriteOpsForecast = (role: string | null) => role === 'owner' || role === 'ops'
+export const canWritePpic = (role: string | null) => role === 'owner' || role === 'ops'
+export const canViewPpic = (role: string | null) => role === 'owner' || role === 'ops'
