@@ -10,7 +10,7 @@ const STATUS_META: Record<string, { label: string; c: string; bg: string }> = {
 
 export default async function PurchasingPage() {
   const supabase = await createClient()
-  const { data: pos } = await supabase.from('purchase_orders').select('id, code, vendor_id, status, order_date').order('created_at', { ascending: false })
+  const { data: pos } = await supabase.from('purchase_orders').select('id, code, vendor_id, status, order_date').or('po_type.eq.material,ppo_id.is.null').order('created_at', { ascending: false })
   const { data: vendors } = await supabase.from('vendors').select('id, name').eq('active', true).order('name')
   const { data: materials } = await supabase.from('materials').select('id, code, name').eq('active', true).order('code')
   const { data: locations } = await supabase.from('locations').select('id, name').eq('active', true).order('name')

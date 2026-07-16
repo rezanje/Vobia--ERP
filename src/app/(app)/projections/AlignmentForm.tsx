@@ -48,7 +48,15 @@ export default function AlignmentForm({ periods, styles, newProducts }: { period
     for (const np of newProducts) {
       if (!npChecked[np.id]) continue
       const q = Number(npQty[np.id] ?? '0')
-      if (Number.isFinite(q) && q > 0) lines.push({ style_id: np.style_id, qty: q, kind: 'seasonal_new', new_product_id: np.id })
+      if (!Number.isFinite(q) || q <= 0) continue
+      // projection_lines has unique (tenant_id, projection_id, style_id) — if a checked
+      // new product shares its style_id with a regular forecast line, replace that line
+      // in place with the seasonal_new one instead of pushing a duplicate (which would
+      // otherwise crash createProjection with a unique-constraint violation).
+      const existingIdx = lines.findIndex((l) => l.style_id === np.style_id)
+      const seasonalLine: ProjectionLineInput = { style_id: np.style_id, qty: q, kind: 'seasonal_new', new_product_id: np.id }
+      if (existingIdx >= 0) lines[existingIdx] = seasonalLine
+      else lines.push(seasonalLine)
     }
     if (!lines.length) { setError('Minimal satu baris dengan qty > 0'); return }
     setSaving(true)
