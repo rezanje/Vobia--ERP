@@ -89,9 +89,7 @@ begin
   if not exists (select 1 from public.projection_lines where projection_id = p_id) then
     raise exception 'projection has no lines';
   end if;
-  alter table public.projections disable trigger projections_lock_guard;
   update public.projections set status = 'locked', locked_at = now() where id = p_id;
-  alter table public.projections enable trigger projections_lock_guard;
 end;
 $$;
 grant execute on function public.lock_projection(uuid) to authenticated;

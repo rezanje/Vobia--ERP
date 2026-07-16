@@ -103,7 +103,7 @@ create or replace function public.guard_locked_projection_header() returns trigg
 language plpgsql as $$
 begin
   if old.status = 'locked' then raise exception 'projection is locked'; end if;
-  return new;
+  return coalesce(new, old);
 end;
 $$;
 create trigger projections_lock_guard
