@@ -1,5 +1,7 @@
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { getRole, canViewPpic } from '@/lib/auth/role'
 
 const SCHEME_META: Record<string, { label: string; c: string; bg: string }> = {
   fob: { label: 'FOB', c: '#9fc0e8', bg: 'rgba(159,192,232,.13)' },
@@ -13,6 +15,7 @@ const STATUS_META: Record<string, { label: string; c: string; bg: string }> = {
 }
 
 export default async function PpoListPage() {
+  if (!canViewPpic(await getRole())) redirect('/')
   const supabase = await createClient()
   const { data: ppos } = await supabase
     .from('ppo')

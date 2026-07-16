@@ -1,8 +1,11 @@
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { getRole, canViewPpic } from '@/lib/auth/role'
 import PcbForm from './PcbForm'
 
 export default async function PcbNewPage({ searchParams }: { searchParams: Promise<{ projection?: string }> }) {
+  if (!canViewPpic(await getRole())) redirect('/')
   const { projection: projectionId } = await searchParams
   const supabase = await createClient()
 

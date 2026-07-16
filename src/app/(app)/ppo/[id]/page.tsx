@@ -1,6 +1,7 @@
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { getRole, canViewPpic } from '@/lib/auth/role'
 import IssueForm from './IssueForm'
 import PaymentPanel from './PaymentPanel'
 import { rp, PO_TYPE_LABEL } from '@/lib/ui'
@@ -17,6 +18,7 @@ const STATUS_META: Record<string, { label: string; c: string; bg: string }> = {
 }
 
 export default async function PpoDetail({ params }: { params: Promise<{ id: string }> }) {
+  if (!canViewPpic(await getRole())) redirect('/')
   const { id } = await params
   const supabase = await createClient()
 

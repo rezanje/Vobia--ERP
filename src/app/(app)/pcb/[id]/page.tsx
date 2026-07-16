@@ -1,6 +1,7 @@
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { getRole, canViewPpic } from '@/lib/auth/role'
 import PpoForm from './PpoForm'
 import { rp } from '@/lib/ui'
 
@@ -21,6 +22,7 @@ const PPO_STATUS_META: Record<string, { label: string; c: string; bg: string }> 
 }
 
 export default async function PcbDetail({ params }: { params: Promise<{ id: string }> }) {
+  if (!canViewPpic(await getRole())) redirect('/')
   const { id } = await params
   const supabase = await createClient()
 

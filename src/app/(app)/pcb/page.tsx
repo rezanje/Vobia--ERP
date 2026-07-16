@@ -1,5 +1,7 @@
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { getRole, canViewPpic } from '@/lib/auth/role'
 import { rp } from '@/lib/ui'
 
 const STATUS_META: Record<string, { label: string; c: string; bg: string }> = {
@@ -8,6 +10,7 @@ const STATUS_META: Record<string, { label: string; c: string; bg: string }> = {
 }
 
 export default async function PcbListPage() {
+  if (!canViewPpic(await getRole())) redirect('/')
   const supabase = await createClient()
   const { data: pcbs } = await supabase
     .from('pcb')
