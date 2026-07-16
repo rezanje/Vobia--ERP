@@ -38,13 +38,22 @@ try {
   console.log('tenant', T);
 
   // --- wipe this tenant's domain data (FK-safe order) ---------------------
+  // projections may be left 'locked' by a prior run of this seeder, which
+  // trips the lock-guard triggers on delete -> disable both around the wipe.
+  await c.query(`alter table projection_lines disable trigger projection_lines_lock_guard`);
+  await c.query(`alter table projections disable trigger projections_lock_guard`);
   for (const t of [
     'return_lines', 'returns', 'order_lines', 'orders',
     'cost_entries', 'prod_lines', 'production_orders',
-    'purchase_lines', 'purchase_orders', 'bom_lines',
-    'material_ledger', 'stock_ledger',
+    'po_payments', 'purchase_lines', 'purchase_orders',
+    'ppo', 'pcb_lines', 'pcb',
+    'projection_lines', 'projections', 'new_products',
+    'forecast_lines', 'forecasts',
+    'bom_lines', 'material_ledger', 'stock_ledger',
     'skus', 'colorways', 'styles', 'materials', 'channels', 'vendors',
   ]) await c.query(`delete from ${t} where tenant_id = $1`, [T]);
+  await c.query(`alter table projections enable trigger projections_lock_guard`);
+  await c.query(`alter table projection_lines enable trigger projection_lines_lock_guard`);
   // keep the default location; drop any extras so re-runs stay clean
   await c.query('delete from locations where tenant_id=$1 and not is_default', [T]);
 
@@ -234,13 +243,61 @@ try {
     [T, ret, SKU['VB-MIRA-PINK-M'], 1]);
   await stockMove(SKU['VB-MIRA-PINK-M'], 1, 'return_in', 'retur ORD-2601', 'return', ret, LOC_MAIN);
 
+  // --- P1-P3: forecast -> projection -> PCB -> PPO -> child POs -----------
+  const Q = '2026-Q3';
+  const STY_A = STYLE['VB-MIRA'];
+  const STY_B = STYLE['VB-LUNA'];
+
+  const fcS = await ins(`insert into forecasts(tenant_id,kind,period) values($1,'sales',$2) returning id`, [T, Q]);
+  const fcO = await ins(`insert into forecasts(tenant_id,kind,period,notes) values($1,'ops',$2,'Rekomendasi ITO 4x') returning id`, [T, Q]);
+  await c.query(`insert into forecast_lines(tenant_id,forecast_id,style_id,qty) values($1,$2,$3,520),($1,$2,$4,340)`, [T, fcS, STY_A, STY_B]);
+  await c.query(`insert into forecast_lines(tenant_id,forecast_id,style_id,qty,ito,stock_ratio) values($1,$2,$3,450,4.2,1.15),($1,$2,$4,300,3.8,1.20)`, [T, fcO, STY_A, STY_B]);
+
+  const NP = await ins(
+    `insert into new_products(tenant_id,name,style_id,rnd_status,mkt_status,agreed_qty,notes)
+     values($1,'Raya Capsule 2026',$2,'done','tervalidasi',200,'Cek ombak IG: 200 pcs aman') returning id`, [T, STY_B]);
+
+  const PROJ = await ins(`insert into projections(tenant_id,period,status,locked_at) values($1,$2,'locked',now()) returning id`, [T, Q]);
+  // trigger lock-guard menolak insert lines saat parent locked -> disable dulu (seeder jalan sbg postgres/owner)
+  await c.query(`alter table projection_lines disable trigger projection_lines_lock_guard`);
+  await c.query(
+    `insert into projection_lines(tenant_id,projection_id,style_id,qty,kind,new_product_id)
+     values($1,$2,$3,450,'regular',null),($1,$2,$4,200,'seasonal_new',$5)`, [T, PROJ, STY_A, STY_B, NP]);
+  await c.query(`alter table projection_lines enable trigger projection_lines_lock_guard`);
+
+  const PCB = await ins(`insert into pcb(tenant_id,code,quarter,projection_id) values($1,'PCB-2026Q3',$2,$3) returning id`, [T, Q, PROJ]);
+  await c.query(
+    `insert into pcb_lines(tenant_id,pcb_id,style_id,target_sales,ending_stock,unit_cost)
+     values($1,$2,$3,450,60,165000),($1,$2,$4,200,0,120000)`, [T, PCB, STY_A, STY_B]);
+
+  // PPO-2 (FOB) -> 1 anak finished, DP lunas + pelunasan pending
+  const PPO_FOB = await ins(`insert into ppo(tenant_id,code,pcb_id,style_id,scheme,qty,status) values($1,'PPO-2',$2,$3,'fob',510,'issued') returning id`, [T, PCB, STY_A]);
+  const POF = await ins(
+    `insert into purchase_orders(tenant_id,code,vendor_id,location_id,ppo_id,po_type,amount,doc_status,approved_at)
+     values($1,'PPO-2-A',$2,$3,$4,'finished',84150000,'approved',now()) returning id`, [T, V.cmt, LOC_MAIN, PPO_FOB]);
+  await c.query(`insert into po_payments(tenant_id,po_id,kind,amount,status,paid_at) values($1,$2,'dp',25000000,'paid',now())`, [T, POF]);
+  await c.query(`insert into po_payments(tenant_id,po_id,kind,amount) values($1,$2,'settlement',59150000)`, [T, POF]);
+
+  // PPO-1 (CMT) -> 4 anak (SOP: 1A bahan, 1B jahit, 1C bordir, 1D aksesoris)
+  const PPO_CMT = await ins(`insert into ppo(tenant_id,code,pcb_id,style_id,scheme,qty,status) values($1,'PPO-1',$2,$3,'cmt',200,'issued') returning id`, [T, PCB, STY_B]);
+  const kinds = [['A', 'material', 9000000], ['B', 'sewing', 6000000], ['C', 'bordir', 2000000], ['D', 'accessory', 1500000]];
+  for (const [sfx, typ, amt] of kinds) {
+    const pid = await ins(
+      `insert into purchase_orders(tenant_id,code,vendor_id,location_id,ppo_id,po_type,amount)
+       values($1,$2,$3,$4,$5,$6,$7) returning id`, [T, `PPO-1-${sfx}`, V.cmt, LOC_MAIN, PPO_CMT, typ, amt]);
+    if (typ === 'material')
+      await c.query(`insert into purchase_lines(tenant_id,po_id,material_id,qty_ordered,unit_price) values($1,$2,$3,300,30000)`, [T, pid, M.cotton]);
+    await c.query(`insert into po_payments(tenant_id,po_id,kind,amount) values($1,$2,'full',$3)`, [T, pid, amt]);
+  }
+
   await c.query('commit');
 
   // --- summary ------------------------------------------------------------
   const counts = {};
   for (const t of ['styles', 'skus', 'materials', 'vendors', 'channels', 'locations',
     'purchase_orders', 'bom_lines', 'production_orders', 'cost_entries',
-    'orders', 'returns', 'material_ledger', 'stock_ledger'])
+    'orders', 'returns', 'material_ledger', 'stock_ledger',
+    'forecasts', 'projections', 'pcb', 'ppo', 'po_payments'])
     counts[t] = (await c.query(`select count(*) n from ${t} where tenant_id=$1`, [T])).rows[0].n;
   console.log('seeded:', counts);
 } catch (e) {
