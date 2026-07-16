@@ -1,11 +1,8 @@
 -- Role-gate PCB/PPO entirely: sales has zero access (read or write) per the
 -- access matrix. owner/ops keep full read+write. Both USING and WITH CHECK
 -- carry the same tenant+role condition, replacing the old tenant-only policy.
--- A missing user_role claim (older/legacy sessions, or test fixtures that
--- predate this branch's role model) is treated as owner-equivalent via
--- coalesce(...,'owner'), mirroring the NULL-bypass semantics already used by
--- the plpgsql guards in 20260717000002 (`v_role not in (...)` short-circuits
--- to unknown/no-raise when v_role is null).
+-- Fail-closed: a missing user_role claim makes the `in (...)` check NULL,
+-- which RLS treats as deny — matching the tenant_id check on the same line.
 drop policy tenant_isolation on public.pcb;
 create policy tenant_isolation on public.pcb for all to authenticated
   using (tenant_id = (auth.jwt() ->> 'tenant_id')::uuid and (auth.jwt() ->> 'user_role') in ('owner','ops'))
