@@ -34,6 +34,7 @@ begin
     v_i := v_i + 1;
     v_type := v_child ->> 'po_type';
     v_vendor := (v_child ->> 'vendor_id')::uuid;
+    if v_type is null then raise exception 'po_type required on each child'; end if;
     if v_ppo.scheme = 'fob' and v_type <> 'finished' then
       raise exception 'FOB child must be finished';
     end if;
