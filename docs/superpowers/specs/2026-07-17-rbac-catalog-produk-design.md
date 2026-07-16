@@ -10,9 +10,11 @@ Follows [[vobia-rbac-sales-ops-built]] (P1–P3 role gating, merged). The full r
 
 Catalog write surfaces (from a codebase scan):
 - `create_style_with_skus(text,text,text,jsonb,text[],jsonb)` — RPC, `security invoker`, writes `styles`+`colorways`+`skus`. Sole write path for `styles`/`colorways`.
-- `skus.update` — direct table write (`src/lib/products/actions.ts`), for SKU edits.
+- `skus.update` — direct table write (`src/lib/products/actions.ts`), for SKU active-toggle.
 - `materials.insert` — direct (`src/lib/materials/actions.ts`), Bahan.
-- `cost_entries.insert` — direct (`src/lib/costing/actions.ts`), HPP.
+- `bom_lines.insert`/`delete` — direct (`src/lib/bom/actions.ts`), the BOM (bill-of-materials) editor on the Styles detail page — part of the style/catalog definition, so gated here too.
+
+**Scope note — HPP/`cost_entries` excluded from this increment.** The HPP page (`/costing`) is a read-only view of `sku_hpp`; it has no write control. `cost_entries` is written only by `addCostEntry` (`src/lib/costing/actions.ts`), triggered from the **production-order detail page** — i.e. its write UI lives in the Produksi module, not the catalog. So `cost_entries` DB+UI gating is deferred to the later Produksi increment where its control lives. This increment covers **Styles + Bahan** writes; the HPP sidebar item is visibility-gated only (stays a read-only view for catalog+view roles).
 
 ## Keputusan desain — READ tetap tenant-wide (WRITE-only gating)
 
@@ -24,12 +26,12 @@ Catalog write surfaces (from a codebase scan):
 |---|---|
 | Schema | none (roles `production`/`inventory` already valid in `profiles.role`) |
 | DB fn | `create_style_with_skus` → add guard: `(auth.jwt()->>'user_role')` must be in `owner`/`production`/`inventory`, else raise Indonesian exception. Guard is first check after `v_tenant is null`. NULL-safe (`coalesce(... in (...), false)` deny). |
-| DB RLS | Add RESTRICTIVE write-policies (insert + update, named per-command to avoid the duplicate-name trap hit last increment) on `skus`, `materials`, `cost_entries`: write requires `(auth.jwt()->>'user_role') in ('owner','production','inventory')`. Existing `tenant_isolation` (SELECT + tenant scope) left untouched. |
+| DB RLS | Add RESTRICTIVE write-policies (insert/update/delete, named per-command to avoid the duplicate-name trap hit last increment) on `skus`, `materials`, `bom_lines`: write requires `(auth.jwt()->>'user_role') in ('owner','production','inventory')`. Existing `tenant_isolation` (SELECT + tenant scope) left untouched. (`cost_entries` deferred — see scope note.) |
 | Demo accounts | Extend `scripts/seed-users.mjs` to also seed `prod.demo@vobia.test` (role `production`) + `inv.demo@vobia.test` (role `inventory`), same tenant/password as sales/ops. |
 | role.ts | `canWriteCatalog(role) = owner\|production\|inventory`; `canViewCatalog(role) = owner\|production\|inventory\|ops\|finance`. |
 | Sidebar | Produk group items Styles/Bahan/HPP get `roles: ['owner','production','inventory','ops','finance']` (hidden for sales/viewer). **Stok item stays unrestricted** (ledger, separate increment). |
-| UI pages | Styles list (create button/link), Styles detail (SKU edit), Bahan (add-material form), HPP/costing (add cost-entry) → write controls rendered only when `canWriteCatalog(role)`; view-only roles see read-only. No page redirect (view roles may open them). |
-| Test | pgTAP `catalog_access.test.sql`: production writes ok (create_style, material insert, cost insert, sku update); sales/finance rejected on all writes; sales can still SELECT `styles`/`materials` (read not broken). |
+| UI pages | Styles list (`+ Style Baru` link), Styles detail (SKU edit control), Bahan (`<MaterialForm>`) → write controls rendered only when `canWriteCatalog(role)`; view-only roles see read-only. HPP page unchanged (already read-only). No page redirect (view roles may open them). |
+| Test | pgTAP `catalog_access.test.sql`: production writes ok (create_style, material insert, sku update); sales/finance rejected on those writes; sales can still SELECT `styles`/`materials` (read not broken). Plus fix `create_style.test.sql` fixture (add `user_role`,`owner` to its JWT claims — else the new fn guard denies it). |
 
 ## Keputusan desain (detail)
 
