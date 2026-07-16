@@ -44,15 +44,15 @@ create policy tenant_isolation on public.projection_lines for all to authenticat
 -- RESTRICTIVE policy that narrows INSERT/UPDATE to owner/ops only — restrictive
 -- policies AND on top of the permissive tenant_isolation policy, so this adds
 -- a role requirement without reopening or changing read access.
-create policy write_role_gate on public.new_products as restrictive for insert to authenticated
+create policy write_role_gate_insert on public.new_products as restrictive for insert to authenticated
   with check ((auth.jwt() ->> 'user_role') in ('owner','ops'));
-create policy write_role_gate on public.new_products as restrictive for update to authenticated
+create policy write_role_gate_update on public.new_products as restrictive for update to authenticated
   using ((auth.jwt() ->> 'user_role') in ('owner','ops'))
   with check ((auth.jwt() ->> 'user_role') in ('owner','ops'));
 
 -- po_payments: same technique — SELECT untouched, write narrowed to owner/ops.
-create policy write_role_gate on public.po_payments as restrictive for insert to authenticated
+create policy write_role_gate_insert on public.po_payments as restrictive for insert to authenticated
   with check ((auth.jwt() ->> 'user_role') in ('owner','ops'));
-create policy write_role_gate on public.po_payments as restrictive for update to authenticated
+create policy write_role_gate_update on public.po_payments as restrictive for update to authenticated
   using ((auth.jwt() ->> 'user_role') in ('owner','ops'))
   with check ((auth.jwt() ->> 'user_role') in ('owner','ops'));
