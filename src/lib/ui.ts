@@ -32,6 +32,15 @@ export const COST_LABELS: Record<string, string> = {
   other: 'Lainnya',
 }
 
+// PO type labels — used everywhere a child PO's po_type is rendered (PPO detail, IssueForm).
+export const PO_TYPE_LABEL: Record<string, string> = {
+  finished: 'Barang Jadi',
+  material: 'Bahan',
+  sewing: 'Jahit',
+  bordir: 'Bordir',
+  accessory: 'Aksesoris',
+}
+
 // Indonesian number formatting (dots as thousands separators).
 export function rp(n: number | null | undefined): string {
   return (n ?? 0).toLocaleString('id-ID')
