@@ -6,6 +6,8 @@ import { logout } from '@/app/auth/actions'
 
 const GROUPS: { title?: string; items: { label: string; href: string }[] }[] = [
   { items: [{ label: 'Dashboard', href: '/' }] },
+  { title: 'Perencanaan', items: [{ label: 'Forecast', href: '/forecasts' }, { label: 'Proyeksi', href: '/projections' }, { label: 'Produk Baru', href: '/new-products' }] },
+  { title: 'PPIC', items: [{ label: 'PCB', href: '/pcb' }, { label: 'PPO', href: '/ppo' }] },
   { title: 'Produk', items: [{ label: 'Styles', href: '/styles' }, { label: 'Stok', href: '/stock' }, { label: 'Bahan', href: '/materials' }, { label: 'HPP', href: '/costing' }] },
   { title: 'Produksi', items: [{ label: 'Produksi', href: '/production' }, { label: 'Vendor', href: '/vendors' }] },
   { title: 'Penjualan', items: [{ label: 'Order', href: '/orders' }, { label: 'Channel', href: '/channels' }, { label: 'Retur', href: '/returns' }] },
