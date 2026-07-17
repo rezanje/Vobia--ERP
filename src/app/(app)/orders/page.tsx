@@ -1,9 +1,11 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { getRole, canWriteSales } from '@/lib/auth/role'
 import { rp } from '@/lib/ui'
 
 export default async function OrdersPage() {
   const supabase = await createClient()
+  const canWrite = canWriteSales(await getRole())
   const { data: orders } = await supabase
     .from('orders').select('id, code, order_date, channel_id')
     .order('order_date', { ascending: false })
@@ -20,7 +22,7 @@ export default async function OrdersPage() {
           <h1 className="vb-h1">Order</h1>
           <div className="vb-sub">{orders?.length ?? 0} order tercatat</div>
         </div>
-        <Link href="/orders/new" className="vb-btn">+ Order Baru</Link>
+        {canWrite && <Link href="/orders/new" className="vb-btn">+ Order Baru</Link>}
       </div>
       {!orders?.length ? (
         <div className="vb-empty">Belum ada order.</div>

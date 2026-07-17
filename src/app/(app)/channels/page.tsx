@@ -1,8 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
+import { getRole, canWriteSales } from '@/lib/auth/role'
 import ChannelForm from './ChannelForm'
 
 export default async function ChannelsPage() {
   const supabase = await createClient()
+  const canWrite = canWriteSales(await getRole())
   const { data: channels } = await supabase.from('channels').select('id, name, active').order('name')
   return (
     <div>
@@ -30,7 +32,12 @@ export default async function ChannelsPage() {
             </div>
           ))}
         </div>
-        <ChannelForm />
+        {canWrite ? <ChannelForm /> : (
+          <div className="vb-card" style={{ padding: 18 }}>
+            <div className="vb-cardtitle" style={{ marginBottom: 8 }}>Channel Baru</div>
+            <div className="vb-muted" style={{ fontSize: 12.5 }}>Hanya role Sales/Owner yang bisa menambah channel.</div>
+          </div>
+        )}
       </div>
     </div>
   )

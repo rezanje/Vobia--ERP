@@ -1,8 +1,10 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { getRole, canWriteSales } from '@/lib/auth/role'
 
 export default async function ReturnsPage() {
   const supabase = await createClient()
+  const canWrite = canWriteSales(await getRole())
   const { data: returns } = await supabase
     .from('returns').select('id, code, return_date, order_id, reason')
     .order('return_date', { ascending: false })
@@ -16,7 +18,7 @@ export default async function ReturnsPage() {
           <h1 className="vb-h1">Retur</h1>
           <div className="vb-sub">{returns?.length ?? 0} retur tercatat</div>
         </div>
-        <Link href="/returns/new" className="vb-btn">+ Retur Baru</Link>
+        {canWrite && <Link href="/returns/new" className="vb-btn">+ Retur Baru</Link>}
       </div>
       {!returns?.length ? (
         <div className="vb-empty">Belum ada retur.</div>
