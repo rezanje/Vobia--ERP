@@ -15,7 +15,12 @@ const GROUPS: { title?: string; items: { label: string; href: string; roles?: st
       { label: 'PCB', href: '/pcb', roles: ['owner', 'ops'] },
       { label: 'PPO', href: '/ppo', roles: ['owner', 'ops'] },
     ] },
-  { title: 'Produk', items: [{ label: 'Styles', href: '/styles' }, { label: 'Stok', href: '/stock' }, { label: 'Bahan', href: '/materials' }, { label: 'HPP', href: '/costing' }] },
+  { title: 'Produk', items: [
+      { label: 'Styles', href: '/styles', roles: ['owner', 'production', 'inventory', 'ops', 'finance'] },
+      { label: 'Stok', href: '/stock' },
+      { label: 'Bahan', href: '/materials', roles: ['owner', 'production', 'inventory', 'ops', 'finance'] },
+      { label: 'HPP', href: '/costing', roles: ['owner', 'production', 'inventory', 'ops', 'finance'] },
+    ] },
   { title: 'Produksi', items: [{ label: 'Produksi', href: '/production' }, { label: 'Vendor', href: '/vendors' }] },
   { title: 'Penjualan', items: [{ label: 'Order', href: '/orders' }, { label: 'Channel', href: '/channels' }, { label: 'Retur', href: '/returns' }] },
   { title: 'Pembelian', items: [{ label: 'Pembelian', href: '/purchasing' }, { label: 'Stok Bahan', href: '/material-stock' }] },
