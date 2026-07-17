@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import ReceiveForm from './ReceiveForm'
 import { rp } from '@/lib/ui'
 import { DocBadge, DocActions } from '@/components/DocApproval'
-import { getRole, canApprove } from '@/lib/auth/role'
+import { getRole, canApprove, canWritePurchasing } from '@/lib/auth/role'
 
 export default async function PurchaseDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -13,6 +13,7 @@ export default async function PurchaseDetail({ params }: { params: Promise<{ id:
   const { data: po } = await supabase.from('purchase_orders').select('*').eq('id', id).single()
   if (!po) notFound()
   const role = await getRole()
+  const canWrite = canWritePurchasing(role)
   const approved = po.doc_status === 'approved'
 
   const { data: lines } = await supabase.from('purchase_lines').select('id, material_id, qty_ordered, unit_price, qty_received').eq('po_id', id)
@@ -39,7 +40,7 @@ export default async function PurchaseDetail({ params }: { params: Promise<{ id:
       </div>
       <div style={{ marginBottom: 12, fontSize: 13 }} className="vb-muted">Nilai PO: <span className="vb-mono">{rp(total)}</span></div>
       {!approved && <div className="vb-empty" style={{ marginBottom: 12 }}>ACC PO dulu sebelum terima barang.</div>}
-      <ReceiveForm poId={po.id} lines={formLines} disabled={!approved || po.status === 'canceled' || po.status === 'received'} />
+      <ReceiveForm poId={po.id} lines={formLines} disabled={!canWrite || !approved || po.status === 'canceled' || po.status === 'received'} />
     </div>
   )
 }
