@@ -1,8 +1,10 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { getRole, canWriteCatalog } from '@/lib/auth/role'
 
 export default async function StylesPage() {
   const supabase = await createClient()
+  const canWrite = canWriteCatalog(await getRole())
   const { data: styles } = await supabase
     .from('style_summary')
     .select('id, code, name, collection, colorway_count, sku_count')
@@ -17,7 +19,7 @@ export default async function StylesPage() {
           <h1 className="vb-h1">Styles</h1>
           <div className="vb-sub">{styles?.length ?? 0} style · {totalSku} SKU</div>
         </div>
-        <Link href="/styles/new" className="vb-btn">+ Style Baru</Link>
+        {canWrite && <Link href="/styles/new" className="vb-btn">+ Style Baru</Link>}
       </div>
 
       {!styles?.length ? (

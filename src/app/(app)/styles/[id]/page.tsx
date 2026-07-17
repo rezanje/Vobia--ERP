@@ -1,11 +1,13 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { getRole, canWriteCatalog } from '@/lib/auth/role'
 import SkuToggle from './SkuToggle'
 import BomSection from './BomSection'
 
 export default async function StyleDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
+  const canWrite = canWriteCatalog(await getRole())
   const supabase = await createClient()
 
   const { data: style } = await supabase.from('styles').select('*').eq('id', id).single()
@@ -39,7 +41,7 @@ export default async function StyleDetail({ params }: { params: Promise<{ id: st
               <div className="vb-mono" style={{ fontWeight: 500 }}>{k.sku_code}</div>
               <div className="vb-text2">{cw?.color_name ?? '—'}</div>
               <div className="vb-mono">{k.size}</div>
-              <SkuToggle id={k.id} active={k.active} />
+              <SkuToggle id={k.id} active={k.active} canWrite={canWrite} />
             </div>
           )
         })}
@@ -49,6 +51,7 @@ export default async function StyleDetail({ params }: { params: Promise<{ id: st
         styleId={id}
         materials={allMaterials ?? []}
         rows={(bomRows ?? []).map((r) => ({ id: r.id, material_id: r.material_id, qty_per_unit: Number(r.qty_per_unit) }))}
+        canWrite={canWrite}
       />
     </div>
   )

@@ -1,10 +1,12 @@
 import { createClient } from '@/lib/supabase/server'
+import { getRole, canWriteCatalog } from '@/lib/auth/role'
 import MaterialForm from './MaterialForm'
 
 const CAT_LABEL: Record<string, string> = { fabric: 'Kain', trim: 'Trim', accessory: 'Aksesoris', other: 'Lainnya' }
 
 export default async function MaterialsPage() {
   const supabase = await createClient()
+  const canWrite = canWriteCatalog(await getRole())
   const { data: materials } = await supabase
     .from('materials').select('id, code, name, category, uom, active').order('code')
   return (
@@ -36,7 +38,12 @@ export default async function MaterialsPage() {
             </div>
           ))}
         </div>
-        <MaterialForm />
+        {canWrite ? <MaterialForm /> : (
+          <div className="vb-card" style={{ padding: 18 }}>
+            <div className="vb-cardtitle" style={{ marginBottom: 8 }}>Bahan Baru</div>
+            <div className="vb-muted" style={{ fontSize: 12.5 }}>Hanya role Produksi/Inventory/Owner yang bisa menambah bahan.</div>
+          </div>
+        )}
       </div>
     </div>
   )

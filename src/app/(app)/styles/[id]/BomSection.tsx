@@ -6,7 +6,7 @@ import { addBomLine, removeBomLine } from '@/lib/bom/actions'
 type MatOption = { id: string; code: string; name: string }
 type BomRow = { id: string; material_id: string; qty_per_unit: number }
 
-export default function BomSection({ styleId, materials, rows }: { styleId: string; materials: MatOption[]; rows: BomRow[] }) {
+export default function BomSection({ styleId, materials, rows, canWrite }: { styleId: string; materials: MatOption[]; rows: BomRow[]; canWrite: boolean }) {
   const router = useRouter()
   const [matId, setMatId] = useState('')
   const [qty, setQty] = useState('')
@@ -43,23 +43,27 @@ export default function BomSection({ styleId, materials, rows }: { styleId: stri
         <div key={r.id} className="vb-row" style={{ gridTemplateColumns: '1.6fr 120px 60px', alignItems: 'center' }}>
           <div style={{ fontSize: 12.5 }}>{codeOf.get(r.material_id) ?? r.material_id}</div>
           <div className="vb-mono" style={{ textAlign: 'right' }}>{r.qty_per_unit}</div>
-          <button type="button" className="vb-btn" style={{ padding: '2px 8px' }} onClick={() => onRemove(r.id)}>×</button>
+          {canWrite ? (
+            <button type="button" className="vb-btn" style={{ padding: '2px 8px' }} onClick={() => onRemove(r.id)}>×</button>
+          ) : <div />}
         </div>
       ))}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 120px auto', gap: 8, padding: 12, alignItems: 'end' }}>
-        <div>
-          <label className="vb-label">Bahan</label>
-          <select className="vb-input" value={matId} onChange={(e) => setMatId(e.target.value)}>
-            <option value="">Pilih bahan…</option>
-            {materials.map((m) => <option key={m.id} value={m.id}>{m.code} · {m.name}</option>)}
-          </select>
+      {canWrite && (
+        <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 120px auto', gap: 8, padding: 12, alignItems: 'end' }}>
+          <div>
+            <label className="vb-label">Bahan</label>
+            <select className="vb-input" value={matId} onChange={(e) => setMatId(e.target.value)}>
+              <option value="">Pilih bahan…</option>
+              {materials.map((m) => <option key={m.id} value={m.id}>{m.code} · {m.name}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="vb-label">Qty/unit</label>
+            <input className="vb-input" placeholder="1.25" value={qty} onChange={(e) => setQty(e.target.value)} />
+          </div>
+          <button className="vb-btn" type="button" disabled={saving} onClick={onAdd} style={{ height: 37 }}>{saving ? '…' : 'Tambah'}</button>
         </div>
-        <div>
-          <label className="vb-label">Qty/unit</label>
-          <input className="vb-input" placeholder="1.25" value={qty} onChange={(e) => setQty(e.target.value)} />
-        </div>
-        <button className="vb-btn" type="button" disabled={saving} onClick={onAdd} style={{ height: 37 }}>{saving ? '…' : 'Tambah'}</button>
-      </div>
+      )}
     </div>
   )
 }
