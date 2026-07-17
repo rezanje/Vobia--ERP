@@ -28,3 +28,6 @@ export const canWriteCost = (role: string | null) => role === 'owner' || role ==
 
 // Penjualan (Order/Channel/Retur) role gate.
 export const canWriteSales = (role: string | null) => role === 'owner' || role === 'sales'
+
+// Lokasi (Pengaturan) role gate.
+export const canWriteLocation = (role: string | null) => role === 'owner' || role === 'ops'

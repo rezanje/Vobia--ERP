@@ -1,8 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
+import { getRole, canWriteLocation } from '@/lib/auth/role'
 import LocationForm from './LocationForm'
 
 export default async function LocationsPage() {
   const supabase = await createClient()
+  const canWrite = canWriteLocation(await getRole())
   const { data: locations } = await supabase
     .from('locations').select('id, name, is_default, active').order('name')
   return (
@@ -32,7 +34,12 @@ export default async function LocationsPage() {
             </div>
           ))}
         </div>
-        <LocationForm />
+        {canWrite ? <LocationForm /> : (
+          <div className="vb-card" style={{ padding: 18 }}>
+            <div className="vb-cardtitle" style={{ marginBottom: 8 }}>Lokasi Baru</div>
+            <div className="vb-muted" style={{ fontSize: 12.5 }}>Hanya role Ops/Owner yang bisa menambah lokasi.</div>
+          </div>
+        )}
       </div>
     </div>
   )
