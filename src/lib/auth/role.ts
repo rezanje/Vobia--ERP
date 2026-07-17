@@ -31,3 +31,6 @@ export const canWriteSales = (role: string | null) => role === 'owner' || role =
 
 // Lokasi (Pengaturan) role gate.
 export const canWriteLocation = (role: string | null) => role === 'owner' || role === 'ops'
+
+// Pembelian role gate.
+export const canWritePurchasing = (role: string | null) => role === 'owner' || role === 'ops' || role === 'inventory'

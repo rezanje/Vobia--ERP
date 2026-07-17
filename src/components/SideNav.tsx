@@ -30,7 +30,10 @@ const GROUPS: { title?: string; items: { label: string; href: string; roles?: st
       { label: 'Channel', href: '/channels', roles: ['owner', 'sales', 'ops', 'finance'] },
       { label: 'Retur', href: '/returns', roles: ['owner', 'sales', 'ops', 'finance'] },
     ] },
-  { title: 'Pembelian', items: [{ label: 'Pembelian', href: '/purchasing' }, { label: 'Stok Bahan', href: '/material-stock' }] },
+  { title: 'Pembelian', items: [
+      { label: 'Pembelian', href: '/purchasing', roles: ['owner', 'ops', 'inventory', 'finance'] },
+      { label: 'Stok Bahan', href: '/material-stock' },
+    ] },
   { title: 'Keuangan', items: [{ label: 'Bagan Akun', href: '/accounts' }, { label: 'Jurnal', href: '/journals' }, { label: 'Neraca Saldo', href: '/reports/trial-balance' }, { label: 'Laba-Rugi', href: '/reports/income' }, { label: 'Neraca', href: '/reports/balance-sheet' }] },
   { title: 'HR', items: [{ label: 'Karyawan', href: '/employees' }, { label: 'Komponen Gaji', href: '/pay-components' }, { label: 'Proses Gaji', href: '/payroll' }] },
   { title: 'Pengaturan', items: [{ label: 'Lokasi', href: '/locations', roles: ['owner', 'ops', 'inventory'] }] },

@@ -24,6 +24,7 @@ const DEMO_USERS = [
   { email: 'ops.demo@vobia.test', role: 'ops', full_name: 'Ops Demo' },
   { email: 'prod.demo@vobia.test', role: 'production', full_name: 'Produksi Demo' },
   { email: 'inv.demo@vobia.test', role: 'inventory', full_name: 'Inventory Demo' },
+  { email: 'finance.demo@vobia.test', role: 'finance', full_name: 'Finance Demo' },
 ];
 
 const c = new Client({ connectionString: DB });

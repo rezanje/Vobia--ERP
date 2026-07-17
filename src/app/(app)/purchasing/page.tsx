@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { getRole, canWritePurchasing } from '@/lib/auth/role'
 import PurchaseForm from './PurchaseForm'
 
 const STATUS_META: Record<string, { label: string; c: string; bg: string }> = {
@@ -10,6 +11,7 @@ const STATUS_META: Record<string, { label: string; c: string; bg: string }> = {
 
 export default async function PurchasingPage() {
   const supabase = await createClient()
+  const canWrite = canWritePurchasing(await getRole())
   const { data: pos } = await supabase.from('purchase_orders').select('id, code, vendor_id, status, order_date').or('po_type.eq.material,ppo_id.is.null').order('created_at', { ascending: false })
   const { data: vendors } = await supabase.from('vendors').select('id, name').eq('active', true).order('name')
   const { data: materials } = await supabase.from('materials').select('id, code, name').eq('active', true).order('code')
@@ -41,7 +43,14 @@ export default async function PurchasingPage() {
             )
           })}
         </div>
-        <PurchaseForm vendors={vendors ?? []} materials={materials ?? []} locations={locations ?? []} />
+        {canWrite ? (
+          <PurchaseForm vendors={vendors ?? []} materials={materials ?? []} locations={locations ?? []} />
+        ) : (
+          <div className="vb-card" style={{ padding: 18 }}>
+            <div className="vb-cardtitle" style={{ marginBottom: 8 }}>PO Bahan Baru</div>
+            <div className="vb-muted" style={{ fontSize: 12.5 }}>Hanya role Ops/Inventory/Owner yang bisa membuat PO pembelian.</div>
+          </div>
+        )}
       </div>
     </div>
   )
