@@ -21,7 +21,10 @@ const GROUPS: { title?: string; items: { label: string; href: string; roles?: st
       { label: 'Bahan', href: '/materials', roles: ['owner', 'production', 'inventory', 'ops', 'finance'] },
       { label: 'HPP', href: '/costing', roles: ['owner', 'production', 'inventory', 'ops', 'finance'] },
     ] },
-  { title: 'Produksi', items: [{ label: 'Produksi', href: '/production' }, { label: 'Vendor', href: '/vendors' }] },
+  { title: 'Produksi', items: [
+      { label: 'Produksi', href: '/production', roles: ['owner', 'production', 'ops'] },
+      { label: 'Vendor', href: '/vendors', roles: ['owner', 'production', 'ops'] },
+    ] },
   { title: 'Penjualan', items: [{ label: 'Order', href: '/orders' }, { label: 'Channel', href: '/channels' }, { label: 'Retur', href: '/returns' }] },
   { title: 'Pembelian', items: [{ label: 'Pembelian', href: '/purchasing' }, { label: 'Stok Bahan', href: '/material-stock' }] },
   { title: 'Keuangan', items: [{ label: 'Bagan Akun', href: '/accounts' }, { label: 'Jurnal', href: '/journals' }, { label: 'Neraca Saldo', href: '/reports/trial-balance' }, { label: 'Laba-Rugi', href: '/reports/income' }, { label: 'Neraca', href: '/reports/balance-sheet' }] },
