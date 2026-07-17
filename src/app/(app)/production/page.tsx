@@ -1,9 +1,11 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { getRole, canWriteProduction } from '@/lib/auth/role'
 import { STAGE_META } from '@/lib/ui'
 
 export default async function ProductionPage() {
   const supabase = await createClient()
+  const canWrite = canWriteProduction(await getRole())
   const { data: orders } = await supabase
     .from('production_orders').select('id, code, stage, deadline, style_id, vendor_id')
     .order('created_at', { ascending: false })
@@ -19,7 +21,7 @@ export default async function ProductionPage() {
           <h1 className="vb-h1">Produksi</h1>
           <div className="vb-sub">{orders?.length ?? 0} order produksi</div>
         </div>
-        <Link href="/production/new" className="vb-btn">+ Order Produksi</Link>
+        {canWrite && <Link href="/production/new" className="vb-btn">+ Order Produksi</Link>}
       </div>
       {!orders?.length ? (
         <div className="vb-empty">Belum ada order produksi.</div>

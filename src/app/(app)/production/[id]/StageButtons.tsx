@@ -7,7 +7,7 @@ import { STAGE_META } from '@/lib/ui'
 
 const FLOW = ['trial', 'mass_production', 'qc', 'completed']
 
-export default function StageButtons({ poId, stage }: { poId: string; stage: string }) {
+export default function StageButtons({ poId, stage, canWrite }: { poId: string; stage: string; canWrite: boolean }) {
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
@@ -46,7 +46,7 @@ export default function StageButtons({ poId, stage }: { poId: string; stage: str
           )
         })}
       </div>
-      {options.length > 0 && (
+      {canWrite && options.length > 0 && (
         <div style={{ display: 'flex', gap: 10, marginTop: 16 }}>
           {options.map((s) => {
             const meta = STAGE_META[s]

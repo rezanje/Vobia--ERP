@@ -1,8 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
+import { getRole, canWriteVendor } from '@/lib/auth/role'
 import VendorForm from './VendorForm'
 
 export default async function VendorsPage() {
   const supabase = await createClient()
+  const canWrite = canWriteVendor(await getRole())
   const { data: vendors } = await supabase.from('vendors').select('id, name, contact, active').order('name')
   return (
     <div>
@@ -31,7 +33,12 @@ export default async function VendorsPage() {
             </div>
           ))}
         </div>
-        <VendorForm />
+        {canWrite ? <VendorForm /> : (
+          <div className="vb-card" style={{ padding: 18 }}>
+            <div className="vb-cardtitle" style={{ marginBottom: 8 }}>Vendor Baru</div>
+            <div className="vb-muted" style={{ fontSize: 12.5 }}>Hanya role Produksi/Ops/Owner yang bisa menambah vendor.</div>
+          </div>
+        )}
       </div>
     </div>
   )

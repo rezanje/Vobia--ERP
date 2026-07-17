@@ -8,7 +8,7 @@ import IssueSection from './IssueSection'
 import { suggestIssue } from '@/lib/bom/suggest'
 import { COST_LABELS, rp } from '@/lib/ui'
 import { DocBadge, DocActions } from '@/components/DocApproval'
-import { getRole, canApprove } from '@/lib/auth/role'
+import { getRole, canApprove, canWriteProduction, canWriteCost } from '@/lib/auth/role'
 
 export default async function ProductionDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -17,6 +17,8 @@ export default async function ProductionDetail({ params }: { params: Promise<{ i
   const { data: po } = await supabase.from('production_orders').select('*').eq('id', id).single()
   if (!po) notFound()
   const role = await getRole()
+  const canWriteProd = canWriteProduction(role)
+  const canWriteCostEntry = canWriteCost(role)
   const approved = po.doc_status === 'approved'
 
   const { data: lines } = await supabase.from('prod_lines').select('id, sku_id, qty_ordered, qty_received, reject_count').eq('po_id', id)
@@ -49,7 +51,7 @@ export default async function ProductionDetail({ params }: { params: Promise<{ i
         <DocActions kind="production" id={po.id} approved={approved} canApprove={canApprove(role)} suratHref={`/production/${po.id}/surat`} />
       </div>
 
-      <StageButtons poId={po.id} stage={po.stage} />
+      <StageButtons poId={po.id} stage={po.stage} canWrite={canWriteProd} />
 
       <div className="vb-card" style={{ overflow: 'hidden', marginBottom: 12 }}>
         <div className="vb-cardtitle" style={{ padding: '14px 16px 10px' }}>Line Produksi</div>
@@ -58,7 +60,7 @@ export default async function ProductionDetail({ params }: { params: Promise<{ i
         </div>
         {(lines ?? []).map((l) => (
           <ProdLineRow key={l.id} id={l.id} sku_code={codeOf.get(l.sku_id) ?? l.sku_id}
-            qty_ordered={l.qty_ordered} qty_received={l.qty_received} reject_count={l.reject_count} />
+            qty_ordered={l.qty_ordered} qty_received={l.qty_received} reject_count={l.reject_count} canWrite={canWriteProd} />
         ))}
       </div>
 
@@ -86,7 +88,12 @@ export default async function ProductionDetail({ params }: { params: Promise<{ i
             <div style={{ padding: '20px 16px', color: 'var(--vb-dim)', fontSize: 12.5 }}>Belum ada biaya tercatat.</div>
           )}
         </div>
-        <CostForm poId={po.id} />
+        {canWriteCostEntry ? <CostForm poId={po.id} /> : (
+          <div className="vb-card" style={{ padding: 18 }}>
+            <div className="vb-cardtitle" style={{ marginBottom: 8 }}>Tambah Biaya</div>
+            <div className="vb-muted" style={{ fontSize: 12.5 }}>Hanya role Produksi/Inventory/Owner yang bisa menambah biaya.</div>
+          </div>
+        )}
       </div>
 
       <IssueSection prodPoId={po.id} suggestions={suggestions} locations={issueLocations ?? []} disabled={!approved} />
