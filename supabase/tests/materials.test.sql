@@ -20,7 +20,7 @@ begin
 
   -- act as tenant A
   perform set_config('request.jwt.claims',
-    json_build_object('sub','b1111111-1111-1111-1111-111111111111','role','authenticated','tenant_id',v_tenant::text)::text, true);
+    json_build_object('sub','b1111111-1111-1111-1111-111111111111','role','authenticated','tenant_id',v_tenant::text,'user_role','owner')::text, true);
   perform set_config('role','authenticated', true);
 
   insert into public.materials (code, name, category, uom) values ('FAB-001','Katun Combed 30s','fabric','m');

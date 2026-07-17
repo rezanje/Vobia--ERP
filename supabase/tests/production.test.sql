@@ -9,7 +9,7 @@ insert into public.vendors (tenant_id, name)
   values ((select tenant_id from public.profiles where id='b8888888-8888-8888-8888-888888888888'), 'B Vendor');
 
 select set_config('request.jwt.claims',
-  json_build_object('sub','a7777777-7777-7777-7777-777777777777','role','authenticated',
+  json_build_object('sub','a7777777-7777-7777-7777-777777777777','role','authenticated','user_role','owner',
     'tenant_id',(select tenant_id::text from public.profiles where id='a7777777-7777-7777-7777-777777777777'))::text, true);
 set local role authenticated;
 

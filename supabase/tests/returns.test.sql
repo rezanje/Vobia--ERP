@@ -16,7 +16,7 @@ begin
   insert into public.returns (tenant_id, code, order_id) values (v_b, 'B-RET', v_b_ord);
 
   perform set_config('request.jwt.claims',
-    json_build_object('sub','a3030303-3030-3030-3030-303030303030','role','authenticated','tenant_id',v_a::text)::text, true);
+    json_build_object('sub','a3030303-3030-3030-3030-303030303030','role','authenticated','tenant_id',v_a::text,'user_role','owner')::text, true);
   perform set_config('role','authenticated', true);
 
   select count(*) into v_cnt from public.returns;

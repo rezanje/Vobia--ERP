@@ -20,7 +20,7 @@ begin
   insert into public.bom_lines (tenant_id, style_id, material_id, qty_per_unit) values (v_other, v_style, v_mat, 1.5);
 
   perform set_config('request.jwt.claims',
-    json_build_object('sub','f1111111-1111-1111-1111-111111111111','role','authenticated','tenant_id',v_tenant::text)::text, true);
+    json_build_object('sub','f1111111-1111-1111-1111-111111111111','role','authenticated','tenant_id',v_tenant::text,'user_role','owner')::text, true);
   perform set_config('role','authenticated', true);
 
   insert into public.styles (tenant_id, code, name) values (v_tenant, 'MYS', 'My') returning id into v_style;
@@ -39,7 +39,7 @@ declare
   v_style uuid; v_mat uuid; v_loc uuid; v_vendor uuid; v_prod uuid; v_sku uuid; v_bal numeric;
 begin
   perform set_config('request.jwt.claims',
-    json_build_object('sub','f1111111-1111-1111-1111-111111111111','role','authenticated','tenant_id',v_tenant::text)::text, true);
+    json_build_object('sub','f1111111-1111-1111-1111-111111111111','role','authenticated','tenant_id',v_tenant::text,'user_role','owner')::text, true);
   perform set_config('role','authenticated', true);
 
   select id into v_loc from public.locations where tenant_id = v_tenant and is_default;

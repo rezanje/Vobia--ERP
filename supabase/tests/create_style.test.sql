@@ -6,7 +6,7 @@ insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data)
           'authenticated','authenticated','cs@c.test','{"tenant_name":"CS Co"}');
 
 select set_config('request.jwt.claims',
-  json_build_object('sub','d4444444-4444-4444-4444-444444444444','role','authenticated',
+  json_build_object('sub','d4444444-4444-4444-4444-444444444444','role','authenticated','user_role','owner',
     'tenant_id',(select tenant_id::text from public.profiles where id='d4444444-4444-4444-4444-444444444444'))::text, true);
 set local role authenticated;
 

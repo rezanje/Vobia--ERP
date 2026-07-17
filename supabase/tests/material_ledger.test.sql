@@ -38,7 +38,7 @@ begin
     values (v_other_tenant, 'OTH-FAB', 'Oth', 'fabric', 'm') returning id into v_other_mat;
 
   perform set_config('request.jwt.claims',
-    json_build_object('sub','d1111111-1111-1111-1111-111111111111','role','authenticated','tenant_id',v_tenant::text)::text, true);
+    json_build_object('sub','d1111111-1111-1111-1111-111111111111','role','authenticated','tenant_id',v_tenant::text,'user_role','owner')::text, true);
   perform set_config('role','authenticated', true);
 
   insert into public.materials (tenant_id, code, name, category, uom)

@@ -13,7 +13,7 @@ declare
   v_style uuid; v_sku uuid; v_bal int;
 begin
   perform set_config('request.jwt.claims',
-    json_build_object('sub','c1111111-1111-1111-1111-111111111111','role','authenticated','tenant_id',v_tenant::text)::text, true);
+    json_build_object('sub','c1111111-1111-1111-1111-111111111111','role','authenticated','tenant_id',v_tenant::text,'user_role','owner')::text, true);
   perform set_config('role','authenticated', true);
 
   v_style := public.create_style_with_skus('STL-1','Stl','',

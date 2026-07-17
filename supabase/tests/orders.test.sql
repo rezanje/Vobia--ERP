@@ -9,7 +9,7 @@ insert into public.channels (tenant_id, name)
   values ((select tenant_id from public.profiles where id='b2020202-2020-2020-2020-202020202020'), 'B Channel');
 
 select set_config('request.jwt.claims',
-  json_build_object('sub','a1010101-1010-1010-1010-101010101010','role','authenticated',
+  json_build_object('sub','a1010101-1010-1010-1010-101010101010','role','authenticated','user_role','owner',
     'tenant_id',(select tenant_id::text from public.profiles where id='a1010101-1010-1010-1010-101010101010'))::text, true);
 set local role authenticated;
 

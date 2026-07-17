@@ -17,7 +17,7 @@ begin
   -- seed a foreign PO to test RLS
   insert into public.vendors (tenant_id, name) values (v_other, 'OthVend');
   perform set_config('request.jwt.claims',
-    json_build_object('sub','e1111111-1111-1111-1111-111111111111','role','authenticated','tenant_id',v_tenant::text)::text, true);
+    json_build_object('sub','e1111111-1111-1111-1111-111111111111','role','authenticated','tenant_id',v_tenant::text,'user_role','owner')::text, true);
   perform set_config('role','authenticated', true);
 
   insert into public.vendors (tenant_id, name) values (v_tenant, 'MyVend') returning id into v_vendor;
@@ -44,7 +44,7 @@ declare
   v_bal numeric; v_status text;
 begin
   perform set_config('request.jwt.claims',
-    json_build_object('sub','e1111111-1111-1111-1111-111111111111','role','authenticated','tenant_id',v_tenant::text)::text, true);
+    json_build_object('sub','e1111111-1111-1111-1111-111111111111','role','authenticated','tenant_id',v_tenant::text,'user_role','owner')::text, true);
   perform set_config('role','authenticated', true);
 
   insert into public.vendors (tenant_id, name) values (v_tenant, 'Vend2') returning id into v_vendor;

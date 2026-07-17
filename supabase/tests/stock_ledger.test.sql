@@ -51,7 +51,7 @@ begin
     values (v_other_tenant, v_other_cw,'M','OTH-RED-M') returning id into v_other_sku;
 
   perform set_config('request.jwt.claims',
-    json_build_object('sub','e5555555-5555-5555-5555-555555555555','role','authenticated','tenant_id',v_tenant_a::text)::text, true);
+    json_build_object('sub','e5555555-5555-5555-5555-555555555555','role','authenticated','tenant_id',v_tenant_a::text,'user_role','owner')::text, true);
   perform set_config('role','authenticated', true);
 
   v_style := public.create_style_with_skus('SL-STY','SL Style','',
