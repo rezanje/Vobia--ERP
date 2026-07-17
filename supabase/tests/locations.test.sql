@@ -20,7 +20,7 @@ begin
 
   -- RLS: acting as tenant A cannot see tenant B's locations
   perform set_config('request.jwt.claims',
-    json_build_object('sub','a1111111-1111-1111-1111-111111111111','role','authenticated','tenant_id',v_tenant::text)::text, true);
+    json_build_object('sub','a1111111-1111-1111-1111-111111111111','role','authenticated','tenant_id',v_tenant::text,'user_role','owner')::text, true);
   perform set_config('role','authenticated', true);
   if exists (select 1 from public.locations where tenant_id = v_other) then
     raise exception 'RLS leak: tenant A sees tenant B locations';
