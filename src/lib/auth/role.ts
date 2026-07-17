@@ -25,3 +25,6 @@ export const canWriteCatalog = (role: string | null) => role === 'owner' || role
 export const canWriteProduction = (role: string | null) => role === 'owner' || role === 'production'
 export const canWriteVendor = (role: string | null) => role === 'owner' || role === 'production' || role === 'ops'
 export const canWriteCost = (role: string | null) => role === 'owner' || role === 'production' || role === 'inventory'
+
+// Penjualan (Order/Channel/Retur) role gate.
+export const canWriteSales = (role: string | null) => role === 'owner' || role === 'sales'
