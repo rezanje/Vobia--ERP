@@ -20,3 +20,8 @@ export const canViewPpic = (role: string | null) => role === 'owner' || role ===
 
 // Catalog (Styles/Bahan/BOM) role gates.
 export const canWriteCatalog = (role: string | null) => role === 'owner' || role === 'production' || role === 'inventory'
+
+// Produksi role gates.
+export const canWriteProduction = (role: string | null) => role === 'owner' || role === 'production'
+export const canWriteVendor = (role: string | null) => role === 'owner' || role === 'production' || role === 'ops'
+export const canWriteCost = (role: string | null) => role === 'owner' || role === 'production' || role === 'inventory'
