@@ -22,6 +22,8 @@ const DEMO_PASSWORD = 'password123';
 const DEMO_USERS = [
   { email: 'sales.demo@vobia.test', role: 'sales', full_name: 'Sales Demo' },
   { email: 'ops.demo@vobia.test', role: 'ops', full_name: 'Ops Demo' },
+  { email: 'prod.demo@vobia.test', role: 'production', full_name: 'Produksi Demo' },
+  { email: 'inv.demo@vobia.test', role: 'inventory', full_name: 'Inventory Demo' },
 ];
 
 const c = new Client({ connectionString: DB });
