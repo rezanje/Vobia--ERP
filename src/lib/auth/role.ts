@@ -20,5 +20,3 @@ export const canViewPpic = (role: string | null) => role === 'owner' || role ===
 
 // Catalog (Styles/Bahan/BOM) role gates.
 export const canWriteCatalog = (role: string | null) => role === 'owner' || role === 'production' || role === 'inventory'
-export const canViewCatalog = (role: string | null) =>
-  role === 'owner' || role === 'production' || role === 'inventory' || role === 'ops' || role === 'finance'
