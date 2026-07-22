@@ -9,6 +9,7 @@ const GROUPS: { title?: string; items: { label: string; href: string; roles?: st
   { title: 'Perencanaan', items: [
       { label: 'Forecast', href: '/forecasts', roles: ['owner', 'sales', 'ops'] },
       { label: 'Proyeksi', href: '/projections', roles: ['owner', 'sales', 'ops'] },
+      { label: 'Proyeksi Stok', href: '/stock-projection', roles: ['owner', 'sales', 'ops'] },
       { label: 'Produk Baru', href: '/new-products', roles: ['owner', 'sales', 'ops'] },
     ] },
   { title: 'PPIC', items: [

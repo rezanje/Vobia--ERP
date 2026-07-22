@@ -3,9 +3,9 @@ import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 
-export async function createVendor(input: { name: string; contact: string }): Promise<{ error: string } | void> {
+export async function createVendor(input: { name: string; contact: string; moq?: number | null }): Promise<{ error: string } | void> {
   const supabase = await createClient()
-  const { error } = await supabase.from('vendors').insert({ name: input.name, contact: input.contact || null })
+  const { error } = await supabase.from('vendors').insert({ name: input.name, contact: input.contact || null, moq: input.moq ?? null })
   if (error) return { error: error.message }
   revalidatePath('/vendors')
 }

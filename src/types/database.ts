@@ -95,9 +95,9 @@ export type Database = {
         Relationships: []
       }
       vendors: {
-        Row: { id: string; tenant_id: string; name: string; contact: string | null; active: boolean; created_at: string }
-        Insert: { id?: string; tenant_id?: string; name: string; contact?: string | null; active?: boolean; created_at?: string }
-        Update: { id?: string; tenant_id?: string; name?: string; contact?: string | null; active?: boolean; created_at?: string }
+        Row: { id: string; tenant_id: string; name: string; contact: string | null; active: boolean; created_at: string; moq: number | null }
+        Insert: { id?: string; tenant_id?: string; name: string; contact?: string | null; active?: boolean; created_at?: string; moq?: number | null }
+        Update: { id?: string; tenant_id?: string; name?: string; contact?: string | null; active?: boolean; created_at?: string; moq?: number | null }
         Relationships: []
       }
       production_orders: {
@@ -268,6 +268,18 @@ export type Database = {
         Update: { id?: string; tenant_id?: string; po_id?: string; kind?: string; amount?: number; status?: string; paid_at?: string | null; created_at?: string }
         Relationships: []
       }
+      planning_params: {
+        Row: { tenant_id: string; cover_months: number; selling_days: number; net_rate: number; lead_time_months: number; updated_at: string }
+        Insert: { tenant_id?: string; cover_months?: number; selling_days?: number; net_rate?: number; lead_time_months?: number; updated_at?: string }
+        Update: { tenant_id?: string; cover_months?: number; selling_days?: number; net_rate?: number; lead_time_months?: number; updated_at?: string }
+        Relationships: []
+      }
+      demand_plan: {
+        Row: { id: string; tenant_id: string; sku_id: string; month: string; qty: number; source: string; updated_at: string }
+        Insert: { id?: string; tenant_id?: string; sku_id: string; month: string; qty: number; source?: string; updated_at?: string }
+        Update: { id?: string; tenant_id?: string; sku_id?: string; month?: string; qty?: number; source?: string; updated_at?: string }
+        Relationships: []
+      }
     }
     Views: {
       style_summary: {
@@ -394,6 +406,42 @@ export type Database = {
       issue_ppo_pos: {
         Args: { p_ppo_id: string; p_children: Json }
         Returns: undefined
+      }
+      set_planning_params: {
+        Args: { p_cover_months: number; p_selling_days: number; p_net_rate: number; p_lead_time_months: number }
+        Returns: undefined
+      }
+      set_demand_plan: {
+        Args: { p_lines: Json }
+        Returns: number
+      }
+      seed_demand_plan: {
+        Args: { p_from: string; p_months?: number; p_lookback_days?: number }
+        Returns: number
+      }
+      project_stock: {
+        Args: { p_from: string; p_months?: number }
+        Returns: {
+          sku_id: string; sku_code: string; month: string; order_month: string
+          beginning_qty: number; incoming_qty: number; committed_qty: number; suggested_qty: number
+          sales_qty: number; ending_qty: number
+          incoming_cogs: number; incoming_gross: number
+          beginning_cogs: number; beginning_gross: number
+          sales_cogs: number; sales_gross: number; sales_net: number
+          ending_cogs: number; ending_gross: number
+          cover_ratio: number | null
+        }[]
+      }
+      projection_summary: {
+        Args: { p_from: string; p_months?: number }
+        Returns: {
+          month: string
+          incoming_cogs: number; incoming_gross: number; beginning_gross: number
+          sales_gross: number; sales_net: number; sales_cogs: number
+          ending_gross: number; ending_cogs: number
+          stock_ratio: number | null; ito: number | null
+          gpm: number | null; margin: number | null; roi: number | null
+        }[]
       }
     }
     Enums: { [_ in never]: never }

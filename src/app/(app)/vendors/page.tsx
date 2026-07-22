@@ -5,7 +5,7 @@ import VendorForm from './VendorForm'
 export default async function VendorsPage() {
   const supabase = await createClient()
   const canWrite = canWriteVendor(await getRole())
-  const { data: vendors } = await supabase.from('vendors').select('id, name, contact, active').order('name')
+  const { data: vendors } = await supabase.from('vendors').select('id, name, contact, active, moq').order('name')
   return (
     <div>
       <div style={{ marginBottom: 20 }}>
@@ -14,15 +14,16 @@ export default async function VendorsPage() {
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: 12, alignItems: 'start' }}>
         <div className="vb-card" style={{ overflow: 'hidden' }}>
-          <div className="vb-thead" style={{ gridTemplateColumns: '1.4fr 1.4fr 100px' }}>
-            <div>Nama</div><div>Kontak</div><div>Status</div>
+          <div className="vb-thead" style={{ gridTemplateColumns: '1.4fr 1.2fr 90px 100px' }}>
+            <div>Nama</div><div>Kontak</div><div style={{ textAlign: 'right' }}>MOQ</div><div>Status</div>
           </div>
           {!vendors?.length ? (
             <div className="vb-empty">Belum ada vendor.</div>
           ) : vendors.map((v) => (
-            <div key={v.id} className="vb-row" style={{ gridTemplateColumns: '1.4fr 1.4fr 100px' }}>
+            <div key={v.id} className="vb-row" style={{ gridTemplateColumns: '1.4fr 1.2fr 90px 100px' }}>
               <div style={{ fontWeight: 500 }}>{v.name}</div>
               <div className="vb-muted" style={{ fontSize: 12.5 }}>{v.contact ?? '—'}</div>
+              <div className="vb-mono" style={{ fontSize: 12.5, textAlign: 'right' }}>{v.moq ? v.moq.toLocaleString('id-ID') : '—'}</div>
               <div>
                 <span className="vb-badge" style={v.active
                   ? { background: 'rgba(147,214,161,.13)', color: '#93d6a1' }

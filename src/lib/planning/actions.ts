@@ -31,6 +31,32 @@ export async function lockProjection(id: string): Promise<{ error: string } | vo
   revalidatePath('/projections')
 }
 
+export type DemandLineInput = { sku_id: string; month: string; qty: number }
+
+export async function setDemandPlan(lines: DemandLineInput[]): Promise<{ error: string } | void> {
+  const supabase = await createClient()
+  const { error } = await supabase.rpc('set_demand_plan', { p_lines: lines })
+  if (error) return { error: error.message }
+  revalidatePath('/stock-projection')
+}
+
+export async function seedDemandPlan(from: string, months: number): Promise<{ error: string } | void> {
+  const supabase = await createClient()
+  const { error } = await supabase.rpc('seed_demand_plan', { p_from: from, p_months: months })
+  if (error) return { error: error.message }
+  revalidatePath('/stock-projection')
+}
+
+export async function setPlanningParams(input: { cover_months: number; selling_days: number; net_rate: number; lead_time_months: number }): Promise<{ error: string } | void> {
+  const supabase = await createClient()
+  const { error } = await supabase.rpc('set_planning_params', {
+    p_cover_months: input.cover_months, p_selling_days: input.selling_days, p_net_rate: input.net_rate,
+    p_lead_time_months: input.lead_time_months,
+  })
+  if (error) return { error: error.message }
+  revalidatePath('/stock-projection')
+}
+
 export async function createNewProduct(input: { name: string; style_id?: string; notes: string }): Promise<{ error: string } | void> {
   const supabase = await createClient()
   const { error } = await supabase.from('new_products').insert({
