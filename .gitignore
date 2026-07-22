@@ -12,3 +12,4 @@ dist/
 
 # TypeScript incremental build cache
 *.tsbuildinfo
+docs/refrence/*.xlsx
